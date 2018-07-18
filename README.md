@@ -7,7 +7,7 @@ A container is available as [hansgschossmann\iot-edge-opc-publisher-testclient](
 The test client does connect to the endpoint `opc.tcp://publisher:62222` and then run tests on the OPC UA exposed methods of the OPC UA server integrated in the OPC Publisher. Those are:
 - PublishNode
 - UnpublishNode
-- GetPublishedNodes
+- GetConfiguredNodes
 
 The test include:
 - Run publish/unpublish sequeces using NodeId and ExpandedNodeId syntax
