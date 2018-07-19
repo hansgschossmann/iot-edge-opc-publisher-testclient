@@ -8,7 +8,7 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NetCoreConsoleClient
+namespace OpcPublisherTestClient
 {
     using OpcPublisher;
     using System.Linq;

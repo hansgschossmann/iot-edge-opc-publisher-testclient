@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NetCoreConsoleClient
+namespace OpcPublisherTestClient
 {
     using System.Reflection;
     using static OpcMethodTest;

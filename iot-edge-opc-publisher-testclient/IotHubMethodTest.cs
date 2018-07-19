@@ -3,13 +3,11 @@ using Opc.Ua;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
-namespace NetCoreConsoleClient
+namespace OpcPublisherTestClient
 {
     using Microsoft.Azure.Devices;
     using OpcPublisher;
-    using System.Linq;
     using System.Net;
     using static Program;
 
