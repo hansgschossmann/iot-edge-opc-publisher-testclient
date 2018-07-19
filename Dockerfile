@@ -1,11 +1,23 @@
-FROM microsoft/dotnet:2.0-sdk-jessie
+ARG runtime_base_tag=2.1-runtime-alpine
+ARG build_base_tag=2.1-sdk-alpine
 
-COPY . /build
+FROM microsoft/dotnet:${build_base_tag} AS build
+WORKDIR /app
 
-WORKDIR /build
+# copy csproj and restore as distinct layers
+COPY iot-edge-opc-publisher-testclient/*.csproj ./iot-edge-opc-publisher-testclient/
+WORKDIR /app/iot-edge-opc-publisher-testclient
 RUN dotnet restore
 
-WORKDIR /build/NetCoreConsoleClient
-RUN dotnet publish --framework netcoreapp2.0 --configuration Release --output /build/out NetCoreConsoleClient.csproj
+# copy and publish app
+WORKDIR /app
+COPY iot-edge-opc-publisher-testclient/. ./iot-edge-opc-publisher-testclient/
+WORKDIR /app/iot-edge-opc-publisher-testclient
+RUN dotnet publish -c Release -o out
 
-ENTRYPOINT ["dotnet", "/build/out/NetCoreConsoleClient.dll"]
+# start it up
+FROM microsoft/dotnet:${runtime_base_tag} AS runtime
+WORKDIR /app
+COPY --from=build /app/iot-edge-opc-publisher-testclient/out ./
+WORKDIR /appdata
+ENTRYPOINT ["dotnet", "/app/iot-edge-opc-publisher-testclient.dll"]

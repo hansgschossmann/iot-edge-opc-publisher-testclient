@@ -72,12 +72,14 @@ namespace NetCoreConsoleClient
             }
 
             _testServerNodeIds = new List<NodeIdInfo>();
+            _testServerNodeIds.Add(new NodeIdInfo("i=2258"));
             for (var i = 0; i < TEST_TAG_NUM; i++)
             {
                 _testServerNodeIds.Add(new NodeIdInfo($"ns=2;s={testSpecifier}_Integer{i:D7}"));
             }
 
             _testServerExpandedNodeIds = new List<NodeIdInfo>();
+            _testServerExpandedNodeIds.Add(new NodeIdInfo("nsu=http://opcfoundation.org/UA/;i=2258"));
             for (var i = 0; i < TEST_TAG_NUM; i++)
             {
                 _testServerExpandedNodeIds.Add(new NodeIdInfo($"nsu=http://opcfoundation.org/Quickstarts/ReferenceApplications;s={testSpecifier}_Integer{i:D7}"));
@@ -130,6 +132,8 @@ namespace NetCoreConsoleClient
             testNodes.Add(_testServerNodeIds[0]);
             PublishNodes(testNodes);
             Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+
+            // todo verify that data is sent to IoTHub as expected, possibly measure turnouround
 
             // fetch the published nodes
             int configuredNodesCount = GetConfiguredNodesOnEndpointCount();
