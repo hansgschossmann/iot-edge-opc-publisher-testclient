@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace NetCoreConsoleClient
 {
+    using System.Reflection;
     using static OpcMethodTest;
 
     public class Program
@@ -49,7 +50,7 @@ namespace NetCoreConsoleClient
                 .MinimumLevel.Debug()
                 .CreateLogger();
 
-            Logger.Information($".Net Core OPC Publisher test client");
+            Logger.Information($"OPC Publisher testclient");
 
             // command line options
             bool showHelp = false;
@@ -59,7 +60,6 @@ namespace NetCoreConsoleClient
             string iotHubConnectionString = string.Empty;
             string iotHubPublisherDeviceName = string.Empty;
             string iotHubPublisherModuleName = string.Empty;
-
 
             Mono.Options.OptionSet options = new Mono.Options.OptionSet {
                 { "h|help", "show this message and exit", h => showHelp = h != null },
@@ -109,6 +109,13 @@ namespace NetCoreConsoleClient
             // initialize logging
             InitLogging();
 
+            // show usage if requested
+            if (showHelp)
+            {
+                Usage(options);
+                return;
+            }
+
             // by default we are connecting to the OPC UA servers in the testbed 
             if (extraArgs.Count > 0)
             {
@@ -135,7 +142,7 @@ namespace NetCoreConsoleClient
             {
                 if (string.IsNullOrEmpty(iotHubConnectionString) || string.IsNullOrEmpty(iotHubPublisherDeviceName))
                 {
-                    Logger.Fatal("For any tests via IoTHub communication an IoTHub connection string and the publisher devicename must be specified.");
+                    Logger.Fatal("For any tests via IoTHub communication an IoTHub connection string and the publisher devicename (and modulename) must be specified.");
                     return;
                 }
                 Logger.Information($"IoTHub connectionstring: {iotHubConnectionString}");
@@ -285,6 +292,32 @@ namespace NetCoreConsoleClient
             StringWriter stringWriter = new StringWriter(stringBuilder);
             options.WriteOptionDescriptions(stringWriter);
             string[] helpLines = stringBuilder.ToString().Split("\r\n");
+            foreach (var line in helpLines)
+            {
+                Logger.Information(line);
+            }
+        }
+
+        /// <summary>
+        /// Usage message.
+        /// </summary>
+        private static void Usage(Mono.Options.OptionSet options)
+        {
+
+            // show usage
+            Logger.Information("");
+            Logger.Information("Usage: {0}.exe [<options>]", Assembly.GetEntryAssembly().GetName().Name);
+            Logger.Information("");
+            Logger.Information("OPC Publisher test client. Requires iot-edge-opc-publisher-testclient and OPC Publisher.");
+            Logger.Information("To exit the application, just press CTRL-C while it is running.");
+            Logger.Information("");
+
+            // output the options
+            Logger.Information("Options:");
+            StringBuilder stringBuilder = new StringBuilder();
+            StringWriter stringWriter = new StringWriter(stringBuilder);
+            options.WriteOptionDescriptions(stringWriter);
+            string[] helpLines = stringBuilder.ToString().Split("\n");
             foreach (var line in helpLines)
             {
                 Logger.Information(line);
