@@ -52,7 +52,7 @@ namespace NetCoreConsoleClient
 
         protected override bool PublishNodes(List<NodeIdInfo> nodeIdInfos, CancellationToken ct, string endpointUrl = null)
         {
-            string logPrefix = $"{_logClassPrefix}:PublishNodes: ";
+            string logPrefix = $"{_logClassPrefix}:PublishNodes:";
             bool result = true;
             try
             {
@@ -75,26 +75,26 @@ namespace NetCoreConsoleClient
                 {
                     if (!nodeIdInfo.Published && methodResult.Status != (int)HttpStatusCode.OK && methodResult.Status != (int)HttpStatusCode.Accepted)
                     {
-                        Logger.Warning($"{logPrefix}failed (nodeId: '{nodeIdInfo.Id}', statusCode: '{methodResult.Status}', publishedState: '{nodeIdInfo.Published}')");
+                        Logger.Warning($"{logPrefix} failed (nodeId: '{nodeIdInfo.Id}', statusCode: '{methodResult.Status}', publishedState: '{nodeIdInfo.Published}')");
                         result = false;
                     }
                     else
                     {
                         nodeIdInfo.Published = true;
-                        Logger.Debug($"{logPrefix}succeeded (nodeId: '{nodeIdInfo.Id}', statusCode: '{methodResult.Status}')");
+                        Logger.Debug($"{logPrefix} succeeded (nodeId: '{nodeIdInfo.Id}', statusCode: '{methodResult.Status}')");
                     }
                 }
             }
             catch (Exception e)
             {
-                Logger.Fatal(e, $"{logPrefix}Exception");
+                Logger.Fatal(e, $"{logPrefix} Exception");
             }
             return result;
         }
 
         protected override bool UnpublishNodes(List<NodeIdInfo> nodeIdInfos, CancellationToken ct, string endpointUrl)
         {
-            string logPrefix = $"{_logClassPrefix}:UnpublishNodes: ";
+            string logPrefix = $"{_logClassPrefix}:UnpublishNodes:";
             try
             {
                 UnpublishNodesMethodRequestModel unpublishNodesMethodRequestModel = new UnpublishNodesMethodRequestModel(endpointUrl);
@@ -116,49 +116,27 @@ namespace NetCoreConsoleClient
                 {
                     if (nodeIdInfo.Published && result.Status != (int)HttpStatusCode.OK && result.Status != (int)HttpStatusCode.Accepted)
                     {
-                        Logger.Warning($"{logPrefix}failed (nodeId: '{nodeIdInfo.Id}', statusCode: '{result.Status}', publishedState: '{nodeIdInfo.Published}')");
+                        Logger.Warning($"{logPrefix} failed (nodeId: '{nodeIdInfo.Id}', statusCode: '{result.Status}', publishedState: '{nodeIdInfo.Published}')");
                         return false;
                     }
                     else
                     {
                         nodeIdInfo.Published = false;
-                        Logger.Debug($"{logPrefix}succeeded (nodeId: '{nodeIdInfo.Id}', statusCode: '{result.Status}'");
+                        Logger.Debug($"{logPrefix} succeeded (nodeId: '{nodeIdInfo.Id}', statusCode: '{result.Status}'");
                         return true;
                     }
                 }
             }
             catch (Exception e)
             {
-                Logger.Fatal(e, $"{logPrefix}Exception");
+                Logger.Fatal(e, $"{logPrefix} Exception");
             }
             return false;
         }
 
-        //private void UnpublishAllNodeIdNodes(CancellationToken ct)
-        //{
-        //    string logPrefix = $"{_logClassPrefix}:UnpublishAllNodeIdNodes: ";
-        //    // unpublish all longhaul NodeId nodes.
-        //    for (int nodeIndex = 0; nodeIndex < _testServerNodeIds.Count; nodeIndex++)
-        //    {
-        //        UnpublishNodes(_testServerNodeIds.GetRange(nodeIndex, 1), ct, _testserverUrl);
-        //    }
-        //    Logger.Verbose($"{logPrefix}completed");
-        //}
-
-        //private void UnpublishAllExpandedNodeIdNodes(CancellationToken ct)
-        //{
-        //    string logPrefix = $"{_logClassPrefix}:UnpublishAllExpandedNodeIdNodes: ";
-        //    // unpublish all longhaul ExpandedNodeId nodes.
-        //    for (int nodeIndex = 0; nodeIndex < _testServerExpandedNodeIds.Count; nodeIndex++)
-        //    {
-        //        UnpublishNodes(_testServerExpandedNodeIds.GetRange(nodeIndex, 1), ct, _testserverUrl);
-        //    }
-        //    Logger.Verbose($"{logPrefix}completed");
-        //}
-
         private void UnpublishAllNodes(CancellationToken ct, string endpointUrl = null)
         {
-            string logPrefix = $"{_logClassPrefix}:UnpublishAllNodes: ";
+            string logPrefix = $"{_logClassPrefix}:UnpublishAllNodes:";
             List<string> endpoints = new List<string>();
             try
             {
@@ -172,17 +150,17 @@ namespace NetCoreConsoleClient
                 {
                     result = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _publisherModuleName, _unpublishAllNodesMethod, ct).Result;
                 }
-                Logger.Debug($"{logPrefix}succeeded, status: '{result.Status}'");
+                Logger.Debug($"{logPrefix} succeeded, status: '{result.Status}'");
             }
             catch (Exception e)
             {
-                Logger.Fatal(e, $"{logPrefix}Exception ");
+                Logger.Fatal(e, $"{logPrefix} Exception ");
             }
         }
 
         private List<string> GetConfiguredEndpoints(CancellationToken ct)
         {
-            string logPrefix = $"{_logClassPrefix}:GetConfiguredEndpoints: ";
+            string logPrefix = $"{_logClassPrefix}:GetConfiguredEndpoints:";
             GetConfiguredEndpointsMethodResponseModel response = null;
             List<string> endpoints = new List<string>();
             try
@@ -216,9 +194,9 @@ namespace NetCoreConsoleClient
             }
             catch (Exception e)
             {
-               Logger.Fatal(e, $"{logPrefix}Exception ");
+               Logger.Fatal(e, $"{logPrefix} Exception ");
             }
-            Logger.Debug($"{logPrefix}succeeded, got {endpoints.Count} endpoints");
+            Logger.Debug($"{logPrefix} succeeded, got {endpoints.Count} endpoints");
             return endpoints;
         }
 
@@ -238,7 +216,7 @@ namespace NetCoreConsoleClient
 
         protected override List<NodeModel> GetConfiguredNodesOnEndpoint(string endpointUrl, CancellationToken ct)
         {
-            string logPrefix = $"{_logClassPrefix}:GetConfiguredNodesOnEndpoint: ";
+            string logPrefix = $"{_logClassPrefix}:GetConfiguredNodesOnEndpoint:";
             GetConfiguredNodesOnEndpointMethodResponseModel response = null;
             List<NodeModel> nodes = new List<NodeModel>();
             try
@@ -273,15 +251,15 @@ namespace NetCoreConsoleClient
             }
             catch (Exception e)
             {
-                Logger.Fatal(e, $"{logPrefix}Exception");
+                Logger.Fatal(e, $"{logPrefix} Exception");
             }
-            Logger.Debug($"{logPrefix}succeeded, got {nodes.Count} nodes are published on endpoint '{endpointUrl}')");
+            Logger.Debug($"{logPrefix} succeeded, got {nodes.Count} nodes are published on endpoint '{endpointUrl}')");
             return nodes;
         }
 
         protected override bool UnpublishAllConfiguredNodes(CancellationToken ct)
         {
-            string logPrefix = $"{_logClassPrefix}:UnpublishAllConfiguredNodes: ";
+            string logPrefix = $"{_logClassPrefix}:UnpublishAllConfiguredNodes:";
             CloudToDeviceMethodResult result = null;
             List<NodeModel> nodes = new List<NodeModel>();
             try
@@ -299,9 +277,9 @@ namespace NetCoreConsoleClient
             }
             catch (Exception e)
             {
-                Logger.Fatal(e, $"{logPrefix}Exception");
+                Logger.Fatal(e, $"{logPrefix} Exception");
             }
-            Logger.Debug($"{logPrefix}succeeded, result: {(HttpStatusCode)result.Status}");
+            Logger.Debug($"{logPrefix} succeeded, result: {(HttpStatusCode)result.Status}");
             return (HttpStatusCode)result.Status == HttpStatusCode.OK ? true : false;
         }
 

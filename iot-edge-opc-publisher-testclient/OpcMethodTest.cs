@@ -144,9 +144,9 @@ namespace NetCoreConsoleClient
 
         //private async Task PublishingIntervalAccuracyAsync(CancellationToken ct, int maxShortWaitSec, int maxLongWaitSec)
         //{
-        //    string logPrefix = $"{_logClassPrefix}:PublishingIntervalAccuracyAsync: ";
+        //    string logPrefix = $"{_logClassPrefix}:PublishingIntervalAccuracyAsync:";
         //    _publishingIntervalSec = maxLongWaitSec;
-        //    Logger.Information($"{logPrefix}Create a subscription with publishing interval of {_publishingIntervalSec} second.");
+        //    Logger.Information($"{logPrefix} Create a subscription with publishing interval of {_publishingIntervalSec} second.");
         //    var subscription = new Subscription(_session.DefaultSubscription) { PublishingInterval = _publishingIntervalSec * 1000 };
 
         //    Logger.Information("OpcMethod:Connection test: Add a list of items (server current time and status) to the subscription.");
@@ -160,7 +160,7 @@ namespace NetCoreConsoleClient
         //    list.ForEach(i => i.Notification += OnNotification);
         //    subscription.AddItems(list);
 
-        //    Logger.Information($"{logPrefix}Add the subscription to the session.");
+        //    Logger.Information($"{logPrefix} Add the subscription to the session.");
         //    _session.AddSubscription(subscription);
         //    subscription.Create();
         //    await Task.Delay(-1, ct);
@@ -204,7 +204,7 @@ namespace NetCoreConsoleClient
             while (!ct.IsCancellationRequested)
             {
                 // unpublish nodes randomly selected
-                Logger.Information($"{logPrefix}Iteration {iteration++} started");
+                Logger.Information($"{logPrefix} Iteration {iteration++} started");
                 for (int i = 0; i < _testServerNodeIds.Count && !ct.IsCancellationRequested; i++)
                 {
                     int nodeIndex = (int)(_testServerNodeIds.Count * random.NextDouble());
@@ -220,13 +220,13 @@ namespace NetCoreConsoleClient
 
                 // delay and check if we should stop.
                 await Task.Delay((int)(maxLongWaitSec * random.NextDouble() * 1000), ct);
-                Logger.Information($"{logPrefix}Iteration {iteration++} completed");
+                Logger.Information($"{logPrefix} Iteration {iteration++} completed");
             }
         }
 
         //private async Task GetListOfPublishedNodesLoopAsync(CancellationToken ct, int maxShortWaitSec, int maxLongWaitSec)
         //{
-        //    string logPrefix = $"{_logClassPrefix}:GetListOfPublishedNodesLoopAsync: ";
+        //    string logPrefix = $"{_logClassPrefix}:GetListOfPublishedNodesLoopAsync:";
         //    Random random = new Random();
         //    int iteration = 0;
 
@@ -239,7 +239,7 @@ namespace NetCoreConsoleClient
         //    {
         //        for (int i = 0; i < _testServerNodeIds.Count && !ct.IsCancellationRequested; i++)
         //        {
-        //            Logger.Information($"{logPrefix}Iteration {iteration++} started");
+        //            Logger.Information($"{logPrefix} Iteration {iteration++} started");
         //            try
         //            {
         //                CallMethodRequestCollection requests = new CallMethodRequestCollection();
@@ -255,13 +255,13 @@ namespace NetCoreConsoleClient
         //                ResponseHeader responseHeader = _session.Call(null, requests, out results, out diagnosticInfos);
         //                if (StatusCode.IsBad(results[0].StatusCode))
         //                {
-        //                    Logger.Warning($"{logPrefix}call was not successfull (status: '{results[0].StatusCode}'");
+        //                    Logger.Warning($"{logPrefix} call was not successfull (status: '{results[0].StatusCode}'");
         //                }
         //                await Task.Delay((int)(maxLongWaitSec * random.NextDouble() * 1000), ct);
         //            }
         //            catch (Exception e)
         //            {
-        //                Logger.Fatal(e, $"{logPrefix}Exception in GetListOfPublishedNodesLoopAsync");
+        //                Logger.Fatal(e, $"{logPrefix} Exception");
         //            }
         //            Logger.Information($"OpcMethod:GetListOfPublishedNodesLoopAsync Iteration {iteration++} completed");
         //        }
@@ -291,36 +291,50 @@ namespace NetCoreConsoleClient
             string logPrefix = $"{_logClassPrefix}:PublishOneNode:";
             try
             {
-                VariantCollection inputArguments = new VariantCollection()
+                int retryCount = 0;
+                int maxRetries = 3;
+                while (retryCount < maxRetries)
+                {
+                    VariantCollection inputArguments = new VariantCollection()
                 {
                     nodeIdInfo.Id,
                     _testserverUrl
                 };
-                CallMethodRequestCollection requests = new CallMethodRequestCollection();
-                CallMethodResultCollection results = null;
-                DiagnosticInfoCollection diagnosticInfos = null;
-                CallMethodRequest request = new CallMethodRequest();
-                request.ObjectId = new NodeId("Methods", 2);
-                request.MethodId = new NodeId("PublishNode", 2);
-                request.InputArguments = inputArguments;
-                requests.Add(request);
-                ResponseHeader responseHeader = _session.Call(null, requests, out results, out diagnosticInfos);
-                if (!nodeIdInfo.Published && StatusCode.IsBad(results[0].StatusCode))
-                {
-                    Logger.Warning($"{logPrefix}failed (nodeId: '{nodeIdInfo.Id}', published: '{nodeIdInfo.Published}')");
-                    return false;
-                }
-                else
-                {
-                    nodeIdInfo.Published = true;
-                    Logger.Verbose($"{logPrefix}succeeded (nodeId: '{nodeIdInfo.Id}', error: '{results[0].StatusCode}'");
-                    return true;
+                    CallMethodRequestCollection requests = new CallMethodRequestCollection();
+                    CallMethodResultCollection results = null;
+                    DiagnosticInfoCollection diagnosticInfos = null;
+                    CallMethodRequest request = new CallMethodRequest();
+                    request.ObjectId = new NodeId("Methods", 2);
+                    request.MethodId = new NodeId("PublishNode", 2);
+                    request.InputArguments = inputArguments;
+                    requests.Add(request);
+                    ResponseHeader responseHeader = _session.Call(null, requests, out results, out diagnosticInfos);
+
+                    if (results[0].StatusCode == StatusCodes.BadSessionNotActivated)
+                    {
+                        retryCount++;
+                        Logger.Warning($"{logPrefix} need to retry to publish node, since session is not yet activated (nodeId: '{nodeIdInfo.Id}', retry: '{retryCount}')");
+                        Task.Delay(_maxShortWaitSec * 1000).Wait();
+                        continue;
+                    }
+                    if (!nodeIdInfo.Published && StatusCode.IsBad(results[0].StatusCode))
+                    {
+                        Logger.Warning($"{logPrefix} failed (nodeId: '{nodeIdInfo.Id}', published: '{nodeIdInfo.Published}')");
+                        return false;
+                    }
+                    else
+                    {
+                        nodeIdInfo.Published = true;
+                        Logger.Verbose($"{logPrefix} succeeded (nodeId: '{nodeIdInfo.Id}', error: '{results[0].StatusCode}'");
+                        return true;
+                    }
                 }
             }
             catch (Exception e)
             {
-                Logger.Fatal(e, $"{logPrefix}Exception in PublishOneNode");
+                Logger.Fatal(e, $"{logPrefix} Exception");
             }
+            Logger.Warning($"{logPrefix} failed (nodeId: '{nodeIdInfo.Id}', published: '{nodeIdInfo.Published}')");
             return false;
         }
 
@@ -355,19 +369,19 @@ namespace NetCoreConsoleClient
                 ResponseHeader responseHeader = _session.Call(null, requests, out results, out diagnosticInfos);
                 if (nodeIdInfo.Published && StatusCode.IsBad(results[0].StatusCode))
                 {
-                    Logger.Warning($"{logPrefix}failed (nodeId: '{nodeIdInfo.Id}', published: '{nodeIdInfo.Published}')");
+                    Logger.Warning($"{logPrefix} failed (nodeId: '{nodeIdInfo.Id}', published: '{nodeIdInfo.Published}')");
                     return false;
                 }
                 else
                 {
                     nodeIdInfo.Published = false;
-                    Logger.Verbose($"{logPrefix}succeeded (nodeId: '{nodeIdInfo.Id}', error: '{results[0].StatusCode}'");
+                    Logger.Verbose($"{logPrefix} succeeded (nodeId: '{nodeIdInfo.Id}', error: '{results[0].StatusCode}'");
                     return true;
                 }
             }
             catch (Exception e)
             {
-                Logger.Fatal(e, $"{logPrefix}Exception in UnpublishOneNode");
+                Logger.Fatal(e, $"{logPrefix} Exception");
             }
             return false;
         }
@@ -400,11 +414,11 @@ namespace NetCoreConsoleClient
                 }
                 catch (Exception e)
                 {
-                    Logger.Fatal(e, $"{logPrefix}Exception");
+                    Logger.Fatal(e, $"{logPrefix} Exception");
                 }
                 if (StatusCode.IsBad(results[0].StatusCode))
                 {
-                    Logger.Warning($"{logPrefix}call was not successfull (status: '{results[0].StatusCode}'");
+                    Logger.Warning($"{logPrefix} call was not successfull (status: '{results[0].StatusCode}'");
                 }
                 else
                 {
@@ -419,7 +433,7 @@ namespace NetCoreConsoleClient
             }
             catch (Exception e)
             {
-                Logger.Fatal(e, $"{logPrefix}Exception");
+                Logger.Fatal(e, $"{logPrefix} Exception");
             }
             return nodeList;
         }
@@ -475,11 +489,11 @@ namespace NetCoreConsoleClient
                 }
                 catch (Exception e)
                 {
-                    Logger.Fatal(e, $"{logPrefix}Exception");
+                    Logger.Fatal(e, $"{logPrefix} Exception");
                 }
                 if (StatusCode.IsBad(results[0].StatusCode))
                 {
-                    Logger.Warning($"{logPrefix}call was not successfull (status: '{results[0].StatusCode}'");
+                    Logger.Warning($"{logPrefix} call was not successfull (status: '{results[0].StatusCode}'");
                 }
                 else
                 {
@@ -526,7 +540,7 @@ namespace NetCoreConsoleClient
             string logPrefix = $"{_logClassPrefix}:Client_KeepAlive:";
             if (e.Status != null && ServiceResult.IsNotGood(e.Status))
             {
-                Logger.Verbose($"{logPrefix}{0} {1}/{2}", e.Status, sender.OutstandingRequestCount, sender.DefunctRequestCount);
+                Logger.Verbose($"{logPrefix} {0} {1}/{2}", e.Status, sender.OutstandingRequestCount, sender.DefunctRequestCount);
 
                 if (_reconnectHandler == null)
                 {
@@ -580,11 +594,11 @@ namespace NetCoreConsoleClient
                 e.Accept = AutoAccept;
                 if (AutoAccept)
                 {
-                    Logger.Verbose($"{logPrefix}Accepted Certificate: {0}", e.Certificate.Subject);
+                    Logger.Verbose($"{logPrefix} Accepted Certificate: {0}", e.Certificate.Subject);
                 }
                 else
                 {
-                    Logger.Warning($"{logPrefix}Rejected Certificate: {0}", e.Certificate.Subject);
+                    Logger.Warning($"{logPrefix} Rejected Certificate: {0}", e.Certificate.Subject);
                 }
             }
         }

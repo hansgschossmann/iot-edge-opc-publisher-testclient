@@ -129,23 +129,24 @@ namespace NetCoreConsoleClient
             List<NodeIdInfo> testNodes = new List<NodeIdInfo>();
             testNodes.Add(_testServerNodeIds[0]);
             PublishNodes(testNodes);
-            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct);
+            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             int configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != numberOfTestNodes)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: {numberOfTestNodes})");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: {numberOfTestNodes}) after publish");
             }
 
             // unpublish them
             UnpublishNodes(testNodes);
+            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != 0)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: 0)");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: 0) after unpublish");
             }
             Logger.Information($"{logPrefix} completed");
         }
@@ -161,23 +162,24 @@ namespace NetCoreConsoleClient
             List<NodeIdInfo> testNodes = new List<NodeIdInfo>();
             testNodes.Add(_testServerExpandedNodeIds[0]);
             PublishNodes(testNodes);
-            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct);
+            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             int configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != numberOfTestNodes)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: {numberOfTestNodes})");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: {numberOfTestNodes} after publish)");
             }
 
             // unpublish them
             UnpublishNodes(testNodes);
+            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != 0)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: 0)");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: 0) after unpublish");
             }
             Logger.Information($"{logPrefix} completed");
         }
@@ -192,30 +194,31 @@ namespace NetCoreConsoleClient
             UnpublishAllConfiguredNodes();
             int numberOfTestNodes = _testServerComplexNameNodeIds.Count;
             PublishNodes(_testServerComplexNameNodeIds);
-            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct);
+            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             int configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != numberOfTestNodes)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: {numberOfTestNodes})");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: {numberOfTestNodes} after publish)");
             }
 
             // unpublish them
             UnpublishNodes(_testServerComplexNameNodeIds);
+            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != 0)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: 0)");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: 0) after unpublish");
             }
             Logger.Information($"{logPrefix} completed");
         }
 
         private void PublishNodeExpandedNodeTest()
         {
-            string logPrefix = $"{this.GetType().Name}:PublishNodeExpandedNodeTest:";
+            string logPrefix = $"{GetType().Name}:{System.Reflection.MethodBase.GetCurrentMethod().Name}:";
             Random random = new Random();
             List<NodeIdInfo> testNodesNodeId = new List<NodeIdInfo>();
             List<NodeIdInfo> testNodesExpandedNodeId = new List<NodeIdInfo>();
@@ -228,23 +231,24 @@ namespace NetCoreConsoleClient
             int numberOfTestNodes = 1;
             PublishNodes(testNodesNodeId);
             PublishNodes(testNodesNodeId);
-            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct);
+            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             int configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != numberOfTestNodes)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: {numberOfTestNodes})");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: {numberOfTestNodes} after publish)");
             }
 
             // unpublish the node once should remove them all
-           UnpublishNodes(testNodesExpandedNodeId);
+            UnpublishNodes(testNodesExpandedNodeId);
+            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != 0)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: 0)");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: 0) after unpublish");
             }
 
 
@@ -252,13 +256,13 @@ namespace NetCoreConsoleClient
             UnpublishAllConfiguredNodes();
             PublishNodes(testNodesExpandedNodeId);
             PublishNodes(testNodesExpandedNodeId);
-            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct);
+            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != numberOfTestNodes)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: {numberOfTestNodes})");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: {numberOfTestNodes} after publish)");
             }
 
             // unpublish them
@@ -268,7 +272,7 @@ namespace NetCoreConsoleClient
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != 0)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: 0)");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: 0) after unpublish");
             }
 
 
@@ -276,13 +280,13 @@ namespace NetCoreConsoleClient
             UnpublishAllConfiguredNodes();
             PublishNodes(testNodesNodeId);
             PublishNodes(testNodesExpandedNodeId);
-            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct);
+            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != numberOfTestNodes)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: {numberOfTestNodes})");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: {numberOfTestNodes}) after publish");
             }
 
             // unpublish the node once using NodeId syntax
@@ -292,7 +296,7 @@ namespace NetCoreConsoleClient
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != 0)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: 0)");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: 0) after unpublish");
             }
 
 
@@ -300,13 +304,13 @@ namespace NetCoreConsoleClient
             UnpublishAllConfiguredNodes();
             PublishNodes(testNodesNodeId);
             PublishNodes(testNodesExpandedNodeId);
-            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct);
+            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != numberOfTestNodes)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: {numberOfTestNodes})");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: {numberOfTestNodes}) after publish");
             }
 
             // unpublish the node once using ExpandedNodeId syntax
@@ -316,7 +320,7 @@ namespace NetCoreConsoleClient
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != 0)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: 0)");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: 0) after unpublish");
             }
 
 
@@ -324,13 +328,13 @@ namespace NetCoreConsoleClient
             UnpublishAllConfiguredNodes();
             PublishNodes(testNodesExpandedNodeId);
             PublishNodes(testNodesNodeId);
-            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct);
+            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != numberOfTestNodes)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: {numberOfTestNodes})");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: {numberOfTestNodes}) after publish");
             }
 
             // unpublish the node once using NodeId syntax
@@ -340,7 +344,7 @@ namespace NetCoreConsoleClient
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != 0)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: 0)");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: 0) after unpublish");
             }
 
 
@@ -349,13 +353,13 @@ namespace NetCoreConsoleClient
             UnpublishAllConfiguredNodes();
             PublishNodes(testNodesExpandedNodeId);
             PublishNodes(testNodesNodeId);
-            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct);
+            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != numberOfTestNodes)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: {numberOfTestNodes})");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: {numberOfTestNodes}) after publish");
             }
 
             // unpublish the node once using ExpandedNodeId syntax
@@ -365,7 +369,7 @@ namespace NetCoreConsoleClient
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
             if (configuredNodesCount != 0)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: 0)");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: 0) after unpublish");
             }
 
 
@@ -383,12 +387,12 @@ namespace NetCoreConsoleClient
 
             // publish nodes with different data types
             PublishNodes(_testServerDataTypeExpandedNodeIds);
-            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct);
+            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             int configuredNodesCount = GetConfiguredNodesOnEndpointCount("Scalar_Simulation");
             if (configuredNodesCount != _testServerDataTypeExpandedNodeIds.Count)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: {_testServerDataTypeExpandedNodeIds.Count})");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: {_testServerDataTypeExpandedNodeIds.Count}) after publish");
             }
 
             // unpublish them
@@ -397,7 +401,7 @@ namespace NetCoreConsoleClient
             configuredNodesCount = GetConfiguredNodesOnEndpointCount(_testserverUrl, "Scalar_Simulation");
             if (configuredNodesCount != 0)
             {
-                Logger.Error($"{logPrefix} There are {configuredNodesCount} nodes configured (expected: 0)");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: 0) after unpublish");
             }
 
             Logger.Information($"{logPrefix} completed");
@@ -417,7 +421,7 @@ namespace NetCoreConsoleClient
             PublishNodes(_testServerMultiTagExpandedNodeIds, _ct);
             TimeSpan elapsedTime = DateTime.Now - startTime;
             Logger.Information($"{logPrefix} configuration of {_testServerMultiTagExpandedNodeIds.Count} nodes took {elapsedTime.TotalMilliseconds} ms");
-            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct);
+            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // unpublish them
             UnpublishNodes(_testServerMultiTagExpandedNodeIds, _ct, _testserverUrl);
@@ -425,7 +429,7 @@ namespace NetCoreConsoleClient
             Logger.Information($"{logPrefix} completed");
 
             // delay and check if we should stop.
-            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct);
+            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct).Wait();
         }
 
         private async Task PublishNodesLoopAsync()

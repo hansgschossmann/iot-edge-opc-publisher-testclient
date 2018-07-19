@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iot-edge-opc-publisher-testclient", "NetCoreConsoleClient\iot-edge-opc-publisher-testclient.csproj", "{DD286325-C828-427C-BAE6-86C2CC09A7A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iot-edge-opc-publisher-testclient", "iot-edge-opc-publisher-testclient\iot-edge-opc-publisher-testclient.csproj", "{DFD962EA-1C10-4446-A579-1B844C747299}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DD286325-C828-427C-BAE6-86C2CC09A7A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DD286325-C828-427C-BAE6-86C2CC09A7A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DD286325-C828-427C-BAE6-86C2CC09A7A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DD286325-C828-427C-BAE6-86C2CC09A7A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFD962EA-1C10-4446-A579-1B844C747299}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFD962EA-1C10-4446-A579-1B844C747299}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFD962EA-1C10-4446-A579-1B844C747299}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFD962EA-1C10-4446-A579-1B844C747299}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
