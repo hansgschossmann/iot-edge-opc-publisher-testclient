@@ -14,7 +14,7 @@ namespace OpcPublisherTestClient
     public class IotHubMethodTest : MethodTestBase
     {
         public IotHubMethodTest(string iotHubConnectionString, string iotHubPublisherDeviceName, string iotHubPublisherModuleName, string testserverUrl,
-            int maxShortWaitSec, int maxLongWaitSec, CancellationToken ct) : base("IoTHubMethodTest", testserverUrl, maxShortWaitSec, maxLongWaitSec, ct)
+            int maxShortWaitSec, int maxLongWaitSec, CancellationToken ct) : base("IotHubMethodTest", testserverUrl, maxShortWaitSec, maxLongWaitSec, ct)
         {
             string logPrefix = $"{_logClassPrefix}:IotHubMethodTest: ";
             Logger.Information($"IoTHub connection string: {iotHubConnectionString}");
@@ -52,6 +52,8 @@ namespace OpcPublisherTestClient
         {
             string logPrefix = $"{_logClassPrefix}:PublishNodes:";
             bool result = true;
+            int retryCount = MAX_RETRY_COUNT;
+
             try
             {
                 PublishNodesMethodRequestModel publishNodesMethodRequestModel = new PublishNodesMethodRequestModel(endpointUrl ?? _testserverUrl);
@@ -59,15 +61,27 @@ namespace OpcPublisherTestClient
                 {
                     publishNodesMethodRequestModel.Nodes.Add(new NodeModel(nodeIdInfo.Id));
                 }
-                _publishNodesMethod.SetPayloadJson(JsonConvert.SerializeObject(publishNodesMethodRequestModel));
-                CloudToDeviceMethodResult methodResult;
-                if (string.IsNullOrEmpty(_publisherModuleName))
+                CloudToDeviceMethodResult methodResult = new CloudToDeviceMethodResult();
+                methodResult.Status = (int)HttpStatusCode.NotAcceptable;
+                while (methodResult.Status == (int)HttpStatusCode.NotAcceptable && retryCount-- > 0)
                 {
-                    methodResult = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _publishNodesMethod, ct).Result;
-                }
-                else
-                {
-                    methodResult = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _publisherModuleName, _publishNodesMethod, ct).Result;
+                    _publishNodesMethod.SetPayloadJson(JsonConvert.SerializeObject(publishNodesMethodRequestModel));
+                    if (string.IsNullOrEmpty(_publisherModuleName))
+                    {
+                        methodResult = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _publishNodesMethod, ct).Result;
+                    }
+                    else
+                    {
+                        methodResult = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _publisherModuleName, _publishNodesMethod, ct).Result;
+                    }
+                    if (methodResult.Status == (int)HttpStatusCode.NotAcceptable)
+                    {
+                        Thread.Sleep(MAX_SHORT_WAIT_SEC * 1000);
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
                 foreach (var nodeIdInfo in nodeIdInfos)
                 {
@@ -281,7 +295,10 @@ namespace OpcPublisherTestClient
             return (HttpStatusCode)result.Status == HttpStatusCode.OK ? true : false;
         }
 
+        const int MAX_RETRY_COUNT = 3;
+
         private static string _logClassPrefix = "IotHubMethodTest";
+
         ServiceClient _iotHubClient;
         string _publisherDeviceName;
         Device _publisherDevice;

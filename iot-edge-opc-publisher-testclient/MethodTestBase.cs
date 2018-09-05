@@ -72,23 +72,20 @@ namespace OpcPublisherTestClient
             }
 
             _testServerNodeIds = new List<NodeIdInfo>();
-            _testServerNodeIds.Add(new NodeIdInfo("i=2258"));
             for (var i = 0; i < TEST_TAG_NUM; i++)
             {
                 _testServerNodeIds.Add(new NodeIdInfo($"ns=2;s={testSpecifier}_Integer{i:D7}"));
             }
 
             _testServerExpandedNodeIds = new List<NodeIdInfo>();
-            _testServerExpandedNodeIds.Add(new NodeIdInfo("nsu=http://opcfoundation.org/UA/;i=2258"));
             for (var i = 0; i < TEST_TAG_NUM; i++)
             {
                 _testServerExpandedNodeIds.Add(new NodeIdInfo($"nsu=http://opcfoundation.org/Quickstarts/ReferenceApplications;s={testSpecifier}_Integer{i:D7}"));
             }
 
             _testServerComplexNameNodeIds = new List<NodeIdInfo>();
-            string specialChars = @"""!§$% &/ () =?`´\\+~*'#_-:.;,<>|@^°€µ{{[]}}";
+            string specialChars = "\"!§$%&/()=?`´\\+~*'#_-:.;,<>|@^°€µ{[]}";
             _testServerComplexNameNodeIds.Add(new NodeIdInfo($"nsu=http://opcfoundation.org/Quickstarts/ReferenceApplications;s={testSpecifier}_{specialChars}"));
-
         }
 
         public void RunExclusiveTests(CancellationToken ct)
@@ -99,8 +96,8 @@ namespace OpcPublisherTestClient
             ComplexNodeNameTest();
             PublishNodeExpandedNodeTest();
             // todo optimize publisher
-            //DataTypeTest();
-            //MultiTagTest();
+            DataTypeTest();
+            MultiTagTest();
             // todo: publish unknown endpoints, different publishing intervals
             return;
         }
