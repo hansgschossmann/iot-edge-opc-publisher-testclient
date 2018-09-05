@@ -214,9 +214,11 @@ namespace OpcPublisherTestClient
             // run all tests for the specified time or Ctrl-C is pressed
             Logger.Information($"Run tests {(testTimeMillisec != Timeout.Infinite ? $"for {testTimeMillisec/1000} seconds or" : "till")} CTRL-C is pressed");
             quitEvent.WaitOne(testTimeMillisec);
+            Logger.Information($"Signal cancellation and wait will everything is completed.");
             cts.Cancel();
             // wait till all tasks are completed
             Task.WaitAll(testTasks.ToArray());
+            Logger.Information($"Exiting....");
             return;
         }
 
