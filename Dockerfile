@@ -20,4 +20,5 @@ FROM microsoft/dotnet:${runtime_base_tag} AS runtime
 WORKDIR /app
 COPY --from=build /app/iot-edge-opc-publisher-testclient/out ./
 WORKDIR /appdata
+COPY --from=build /app/iot-edge-opc-publisher-testclient/out/Opc.Ua.SampleClient.Config.xml ./
 ENTRYPOINT ["dotnet", "/app/iot-edge-opc-publisher-testclient.dll"]
