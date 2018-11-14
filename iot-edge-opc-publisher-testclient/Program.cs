@@ -63,7 +63,7 @@ namespace OpcPublisherTestClient
 
             Mono.Options.OptionSet options = new Mono.Options.OptionSet {
                 { "h|help", "show this message and exit", h => showHelp = h != null },
-                { "a|autoaccept", "auto accept certificates (for testing only)", a => AutoAccept = a != null },
+                { "aa|autoaccept", "auto accept certificates (for testing only)", a => AutoAccept = a != null },
                 { "ne|noexclusive", "do not execute any exclusive tests", ne => RunExclusiveTests = ne == null },
                 { "tt|testtime=", "the number of seconds to run the different tests", (int t) => testTimeMillisec = t * 1000 },
                 { "tu|testserverurl=", "URL of the OPC UA test server", (string s) => _testserverUrl = s },
