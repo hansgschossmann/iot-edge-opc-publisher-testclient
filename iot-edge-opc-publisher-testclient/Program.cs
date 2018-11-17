@@ -60,19 +60,21 @@ namespace OpcPublisherTestClient
             string iotHubConnectionString = string.Empty;
             string iotHubPublisherDeviceName = string.Empty;
             string iotHubPublisherModuleName = string.Empty;
+            int initialWait = 10000;
 
             Mono.Options.OptionSet options = new Mono.Options.OptionSet {
                 { "h|help", "show this message and exit", h => showHelp = h != null },
+                { "ip|initialpause=", $"initial wait in sec to allow other services to start up.\nDefault: {initialWait/1000}", (int i) => initialWait = i * 1000 },
                 { "aa|autoaccept", "auto accept certificates (for testing only)", a => AutoAccept = a != null },
                 { "ne|noexclusive", "do not execute any exclusive tests", ne => RunExclusiveTests = ne == null },
                 { "tt|testtime=", "the number of seconds to run the different tests", (int t) => testTimeMillisec = t * 1000 },
                 { "tu|testserverurl=", "URL of the OPC UA test server", (string s) => _testserverUrl = s },
                 { "pu|publisherurl=", "URL of the OPC Publisher (required when using OPC UA methods)", (string s) => PublisherUrl = s },
                 { "o1|opcmethods", "use the OPC UA methods calls to test",  b => opcMethods = b != null },
-                { "ic|iotHubConnectionString=", "IoTHub owner connectionstring", (string s) => iotHubConnectionString = s },
+                { "ic|iothubconnectionstring=", "IoTHub owner connectionstring", (string s) => iotHubConnectionString = s },
                 { "id|iothubdevicename=", "IoTHub device name of the OPC Publisher (required when using IoT methods)", (string s) => iotHubPublisherDeviceName = s },
                 { "im|iothubmodulename=", "IoTEdge module name of the OPC Publisher which runs in IoTEdge specified by im/iothubdevicename(required when using IoT methods and IoTEdge)", (string s) => iotHubPublisherModuleName = s },
-                { "i1|iotHubMethods", "use IoTHub direct methods calls to test", b => iotHubMethods = b != null },
+                { "i1|iothubmethods", "use IoTHub direct methods calls to test", b => iotHubMethods = b != null },
                 { "lf|logfile=", $"the filename of the logfile to use.\nDefault: './{_logFileName}'", (string l) => _logFileName = l },
                 { "ll|loglevel=", $"the loglevel to use (allowed: fatal, error, warn, info, debug, verbose).\nDefault: info", (string l) => {
                         List<string> logLevels = new List<string> {"fatal", "error", "warn", "info", "debug", "verbose"};
@@ -126,6 +128,10 @@ namespace OpcPublisherTestClient
                 Usage(options, args);
                 return;
             }
+
+            // initial wait
+            Logger.Information($"Waiting for {initialWait/1000} secondes...");
+            Thread.Sleep(initialWait);
 
             // sanity check parameters
             if (opcMethods == false && iotHubMethods == false)
