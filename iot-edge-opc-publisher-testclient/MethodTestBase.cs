@@ -88,7 +88,7 @@ namespace OpcPublisherTestClient
             TestserverComplexNameNodeIds.Add(new NodeIdInfo($"nsu=http://opcfoundation.org/Quickstarts/ReferenceApplications;s={testSpecifier}_{specialChars}"));
         }
 
-        public void RunExclusiveTests(CancellationToken ct)
+        public void RunExclusiveTests(CancellationToken ct = default(CancellationToken))
         {
             AdhocTest();
             SingleNodeIdTest();

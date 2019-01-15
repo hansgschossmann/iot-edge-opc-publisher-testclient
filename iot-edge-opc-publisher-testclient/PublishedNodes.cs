@@ -12,9 +12,8 @@ namespace OpcPublisher
         {
         }
 
-        public Uri EndPointURL;
-
-        public NodeId NodeID;
+        public Uri EndPointURL { get; set; }
+        public NodeId NodeID { get; set; }
     }
 
     public class PublishedNodesCollection : List<NodeLookup>
@@ -34,7 +33,7 @@ namespace OpcPublisher
 
         public string Id { get; set; }
 
-        public bool Published;
+        public bool Published { get; set; }
     }
 
     //    public class OpcNodeOnEndpoint

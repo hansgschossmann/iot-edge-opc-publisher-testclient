@@ -450,7 +450,7 @@ namespace OpcPublisherTestClient
 
                 foreach (var publishedNode in publishedNodes)
                 {
-                    OpcNodeOnEndpointModel node = new OpcNodeOnEndpointModel() { Id = publishedNode.NodeID.ToString() };
+                    OpcNodeOnEndpointModel node = new OpcNodeOnEndpointModel(publishedNode.NodeID.ToString());
                     nodeList.Add(node);
                 }
             }

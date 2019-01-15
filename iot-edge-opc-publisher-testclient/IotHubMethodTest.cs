@@ -60,7 +60,7 @@ namespace OpcPublisherTestClient
                 PublishNodesMethodRequestModel publishNodesMethodRequestModel = new PublishNodesMethodRequestModel(endpointUrl ?? TestserverUrl);
                 foreach (var nodeIdInfo in nodeIdInfos)
                 {
-                    publishNodesMethodRequestModel.OpcNodes.Add(new OpcNodeOnEndpointModel() { Id = nodeIdInfo.Id });
+                    publishNodesMethodRequestModel.OpcNodes.Add(new OpcNodeOnEndpointModel(nodeIdInfo.Id));
                 }
                 CloudToDeviceMethodResult methodResult = new CloudToDeviceMethodResult();
                 methodResult.Status = (int)HttpStatusCode.NotAcceptable;
@@ -113,7 +113,7 @@ namespace OpcPublisherTestClient
                 UnpublishNodesMethodRequestModel unpublishNodesMethodRequestModel = new UnpublishNodesMethodRequestModel(endpointUrl);
                 foreach (var nodeIdInfo in nodeIdInfos)
                 {
-                    unpublishNodesMethodRequestModel.OpcNodes.Add(new OpcNodeOnEndpointModel() { Id = nodeIdInfo.Id });
+                    unpublishNodesMethodRequestModel.OpcNodes.Add(new OpcNodeOnEndpointModel(nodeIdInfo.Id));
                 }
                 _unpublishNodesMethod.SetPayloadJson(JsonConvert.SerializeObject(unpublishNodesMethodRequestModel));
                 CloudToDeviceMethodResult result;

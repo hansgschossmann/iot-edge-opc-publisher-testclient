@@ -1,5 +1,5 @@
 ﻿
-using Microsoft.Azure.Devices.Client;
+using Microsoft.Azure.Devices;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
