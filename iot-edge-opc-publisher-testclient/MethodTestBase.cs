@@ -18,10 +18,10 @@ namespace OpcPublisherTestClient
     {
         public MethodTestBase(string testSpecifier, string testserverUrl, int maxShortWaitSec, int maxLongWaitSec, CancellationToken ct)
         {
-            _testSpecifier = testSpecifier;
-            _testserverUrl = testserverUrl;
-            _maxShortWaitSec = maxShortWaitSec;
-            _maxLongWaitSec = maxLongWaitSec;
+            TestSpecifier = testSpecifier;
+            TestserverUrl = testserverUrl;
+            MaxShortWaitSec = maxShortWaitSec;
+            MaxLongWaitSec = maxLongWaitSec;
             _ct = ct;
 
             // create NodeId names for the test
@@ -57,35 +57,35 @@ namespace OpcPublisherTestClient
                 "XmlElement"
             };
 
-            _testServerDataTypeExpandedNodeIds = new List<NodeIdInfo>();
+            TestserverDataTypeExpandedNodeIds = new List<NodeIdInfo>();
             foreach (var postfix in simulationNodePostfix)
             {
-                _testServerDataTypeExpandedNodeIds.Add(new NodeIdInfo($"nsu=http://opcfoundation.org/Quickstarts/ReferenceApplications;s=Scalar_Simulation_{postfix}"));
-                _testServerDataTypeExpandedNodeIds.Add(new NodeIdInfo($"nsu=http://opcfoundation.org/Quickstarts/ReferenceApplications;s=Scalar_Simulation_Arrays_{postfix}"));
-                _testServerDataTypeExpandedNodeIds.Add(new NodeIdInfo($"nsu=http://opcfoundation.org/Quickstarts/ReferenceApplications;s=Scalar_Simulation_Mass_{postfix}"));
+                TestserverDataTypeExpandedNodeIds.Add(new NodeIdInfo($"nsu=http://opcfoundation.org/Quickstarts/ReferenceApplications;s=Scalar_Simulation_{postfix}"));
+                TestserverDataTypeExpandedNodeIds.Add(new NodeIdInfo($"nsu=http://opcfoundation.org/Quickstarts/ReferenceApplications;s=Scalar_Simulation_Arrays_{postfix}"));
+                TestserverDataTypeExpandedNodeIds.Add(new NodeIdInfo($"nsu=http://opcfoundation.org/Quickstarts/ReferenceApplications;s=Scalar_Simulation_Mass_{postfix}"));
             };
 
-            _testServerMultiTagExpandedNodeIds = new List<NodeIdInfo>();
-            for (var i = 0; i < TEST_TAG_NUM; i++)
+            TestserverMultiTagExpandedNodeIds = new List<NodeIdInfo>();
+            for (var i = 0; i < TestTagNum; i++)
             {
-                _testServerMultiTagExpandedNodeIds.Add(new NodeIdInfo($"nsu=http://opcfoundation.org/Quickstarts/ReferenceApplications;s=MultiTagTest_Integer{i:D7}"));
+                TestserverMultiTagExpandedNodeIds.Add(new NodeIdInfo($"nsu=http://opcfoundation.org/Quickstarts/ReferenceApplications;s=MultiTagTest_Integer{i:D7}"));
             }
 
-            _testServerNodeIds = new List<NodeIdInfo>();
-            for (var i = 0; i < TEST_TAG_NUM; i++)
+            TestserverNodeIds = new List<NodeIdInfo>();
+            for (var i = 0; i < TestTagNum; i++)
             {
-                _testServerNodeIds.Add(new NodeIdInfo($"ns=2;s={testSpecifier}_Integer{i:D7}"));
+                TestserverNodeIds.Add(new NodeIdInfo($"ns=2;s={testSpecifier}_Integer{i:D7}"));
             }
 
-            _testServerExpandedNodeIds = new List<NodeIdInfo>();
-            for (var i = 0; i < TEST_TAG_NUM; i++)
+            TestserverExpandedNodeIds = new List<NodeIdInfo>();
+            for (var i = 0; i < TestTagNum; i++)
             {
-                _testServerExpandedNodeIds.Add(new NodeIdInfo($"nsu=http://opcfoundation.org/Quickstarts/ReferenceApplications;s={testSpecifier}_Integer{i:D7}"));
+                TestserverExpandedNodeIds.Add(new NodeIdInfo($"nsu=http://opcfoundation.org/Quickstarts/ReferenceApplications;s={testSpecifier}_Integer{i:D7}"));
             }
 
-            _testServerComplexNameNodeIds = new List<NodeIdInfo>();
+            TestserverComplexNameNodeIds = new List<NodeIdInfo>();
             string specialChars = "\"!§$%&/()=?`´\\+~*'#_-:.;,<>|@^°€µ{[]}";
-            _testServerComplexNameNodeIds.Add(new NodeIdInfo($"nsu=http://opcfoundation.org/Quickstarts/ReferenceApplications;s={testSpecifier}_{specialChars}"));
+            TestserverComplexNameNodeIds.Add(new NodeIdInfo($"nsu=http://opcfoundation.org/Quickstarts/ReferenceApplications;s={testSpecifier}_{specialChars}"));
         }
 
         public void RunExclusiveTests(CancellationToken ct)
@@ -107,10 +107,10 @@ namespace OpcPublisherTestClient
             var publisherTests = new List<Task>
             {
                 //Task.Run(async () => await PublishingIntervalAccuracyAsync()),
-                Task.Run(async () => await PublishNodesLoopAsync()),
-                Task.Run(async () => await UnpublishNodesLoopAsync()),
-                Task.Run(async () => await GetPublishedNodesLegacyLoopAsync()),
-                Task.Run(async () => await GetConfiguredNodesOnEndpointLoopAsync())
+                Task.Run(async () => await PublishNodesLoopAsync().ConfigureAwait(false)),
+                Task.Run(async () => await UnpublishNodesLoopAsync().ConfigureAwait(false)),
+                Task.Run(async () => await GetPublishedNodesLegacyLoopAsync().ConfigureAwait(false)),
+                Task.Run(async () => await GetConfiguredNodesOnEndpointLoopAsync().ConfigureAwait(false))
             };
             return publisherTests;
         }
@@ -126,9 +126,9 @@ namespace OpcPublisherTestClient
             UnpublishAllConfiguredNodes();
             int numberOfTestNodes = 1;
             List<NodeIdInfo> testNodes = new List<NodeIdInfo>();
-            testNodes.Add(_testServerNodeIds[0]);
+            testNodes.Add(TestserverNodeIds[0]);
             PublishNodes(testNodes);
-            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // todo verify that data is sent to IoTHub as expected, possibly measure turnouround
 
@@ -141,7 +141,7 @@ namespace OpcPublisherTestClient
 
             // unpublish them
             UnpublishNodes(testNodes);
-            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
@@ -161,9 +161,9 @@ namespace OpcPublisherTestClient
             UnpublishAllConfiguredNodes();
             int numberOfTestNodes = 1;
             List<NodeIdInfo> testNodes = new List<NodeIdInfo>();
-            testNodes.Add(_testServerExpandedNodeIds[0]);
+            testNodes.Add(TestserverExpandedNodeIds[0]);
             PublishNodes(testNodes);
-            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             int configuredNodesCount = GetConfiguredNodesOnEndpointCount();
@@ -174,7 +174,7 @@ namespace OpcPublisherTestClient
 
             // unpublish them
             UnpublishNodes(testNodes);
-            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
@@ -193,9 +193,9 @@ namespace OpcPublisherTestClient
             // publish nodes with complex names
             Logger.Information($"{logPrefix} started");
             UnpublishAllConfiguredNodes();
-            int numberOfTestNodes = _testServerComplexNameNodeIds.Count;
-            PublishNodes(_testServerComplexNameNodeIds);
-            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            int numberOfTestNodes = TestserverComplexNameNodeIds.Count;
+            PublishNodes(TestserverComplexNameNodeIds);
+            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             int configuredNodesCount = GetConfiguredNodesOnEndpointCount();
@@ -205,8 +205,8 @@ namespace OpcPublisherTestClient
             }
 
             // unpublish them
-            UnpublishNodes(_testServerComplexNameNodeIds);
-            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            UnpublishNodes(TestserverComplexNameNodeIds);
+            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
@@ -223,8 +223,8 @@ namespace OpcPublisherTestClient
             Random random = new Random();
             List<NodeIdInfo> testNodesNodeId = new List<NodeIdInfo>();
             List<NodeIdInfo> testNodesExpandedNodeId = new List<NodeIdInfo>();
-            testNodesNodeId.Add(_testServerNodeIds[0]);
-            testNodesExpandedNodeId.Add(_testServerExpandedNodeIds[0]);
+            testNodesNodeId.Add(TestserverNodeIds[0]);
+            testNodesExpandedNodeId.Add(TestserverExpandedNodeIds[0]);
 
             Logger.Information($"{logPrefix} started");
             Logger.Information($"{logPrefix} publish same node twice using NodeId syntax and unpublish via NodeId syntax");
@@ -232,7 +232,7 @@ namespace OpcPublisherTestClient
             int numberOfTestNodes = 1;
             PublishNodes(testNodesNodeId);
             PublishNodes(testNodesNodeId);
-            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             int configuredNodesCount = GetConfiguredNodesOnEndpointCount();
@@ -243,7 +243,7 @@ namespace OpcPublisherTestClient
 
             // unpublish the node once should remove them all
             UnpublishNodes(testNodesExpandedNodeId);
-            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
@@ -257,7 +257,7 @@ namespace OpcPublisherTestClient
             UnpublishAllConfiguredNodes();
             PublishNodes(testNodesExpandedNodeId);
             PublishNodes(testNodesExpandedNodeId);
-            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
@@ -281,7 +281,7 @@ namespace OpcPublisherTestClient
             UnpublishAllConfiguredNodes();
             PublishNodes(testNodesNodeId);
             PublishNodes(testNodesExpandedNodeId);
-            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
@@ -305,7 +305,7 @@ namespace OpcPublisherTestClient
             UnpublishAllConfiguredNodes();
             PublishNodes(testNodesNodeId);
             PublishNodes(testNodesExpandedNodeId);
-            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
@@ -329,7 +329,7 @@ namespace OpcPublisherTestClient
             UnpublishAllConfiguredNodes();
             PublishNodes(testNodesExpandedNodeId);
             PublishNodes(testNodesNodeId);
-            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
@@ -354,7 +354,7 @@ namespace OpcPublisherTestClient
             UnpublishAllConfiguredNodes();
             PublishNodes(testNodesExpandedNodeId);
             PublishNodes(testNodesNodeId);
-            Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
@@ -387,19 +387,19 @@ namespace OpcPublisherTestClient
             UnpublishAllConfiguredNodes();
 
             // publish nodes with different data types
-            PublishNodes(_testServerDataTypeExpandedNodeIds);
-            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            PublishNodes(TestserverDataTypeExpandedNodeIds);
+            Task.Delay((int)(MaxLongWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             int configuredNodesCount = GetConfiguredNodesOnEndpointCount("Scalar_Simulation");
-            if (configuredNodesCount != _testServerDataTypeExpandedNodeIds.Count)
+            if (configuredNodesCount != TestserverDataTypeExpandedNodeIds.Count)
             {
-                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: {_testServerDataTypeExpandedNodeIds.Count}) after publish");
+                Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: {TestserverDataTypeExpandedNodeIds.Count}) after publish");
             }
 
             // unpublish them
-            UnpublishNodes(_testServerDataTypeExpandedNodeIds, _ct, _testserverUrl);
+            UnpublishNodes(TestserverDataTypeExpandedNodeIds, _ct, TestserverUrl);
 
-            configuredNodesCount = GetConfiguredNodesOnEndpointCount(_testserverUrl, "Scalar_Simulation");
+            configuredNodesCount = GetConfiguredNodesOnEndpointCount(TestserverUrl, "Scalar_Simulation");
             if (configuredNodesCount != 0)
             {
                 Logger.Error($"{logPrefix} There is(are) {configuredNodesCount} node(s) configured (expected: 0) after unpublish");
@@ -419,18 +419,18 @@ namespace OpcPublisherTestClient
             UnpublishAllConfiguredNodes();
 
             DateTime startTime = DateTime.Now;
-            PublishNodes(_testServerMultiTagExpandedNodeIds, _ct);
+            PublishNodes(TestserverMultiTagExpandedNodeIds, _ct);
             TimeSpan elapsedTime = DateTime.Now - startTime;
-            Logger.Information($"{logPrefix} configuration of {_testServerMultiTagExpandedNodeIds.Count} nodes took {elapsedTime.TotalMilliseconds} ms");
-            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Logger.Information($"{logPrefix} configuration of {TestserverMultiTagExpandedNodeIds.Count} nodes took {elapsedTime.TotalMilliseconds} ms");
+            Task.Delay((int)(MaxLongWaitSec * random.NextDouble() * 1000), _ct).Wait();
 
             // unpublish them
-            UnpublishNodes(_testServerMultiTagExpandedNodeIds, _ct, _testserverUrl);
+            UnpublishNodes(TestserverMultiTagExpandedNodeIds, _ct, TestserverUrl);
 
             Logger.Information($"{logPrefix} completed");
 
             // delay and check if we should stop.
-            Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Task.Delay((int)(MaxLongWaitSec * random.NextDouble() * 1000), _ct).Wait();
         }
 
         private async Task PublishNodesLoopAsync()
@@ -443,18 +443,18 @@ namespace OpcPublisherTestClient
             {
                 // publish all nodes.
                 Logger.Information($"{logPrefix} Iteration {iteration++} started");
-                PublishNodes(_testServerNodeIds);
-                await Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct);
+                PublishNodes(TestserverNodeIds);
+                await Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
 
                 // publish nodes randomly selected.
-                for (int i = 0; i < _testServerNodeIds.Count && !_ct.IsCancellationRequested; i++)
+                for (int i = 0; i < TestserverNodeIds.Count && !_ct.IsCancellationRequested; i++)
                 {
-                    int nodeIndex = (int)(_testServerNodeIds.Count * random.NextDouble());
-                    PublishNodes(_testServerNodeIds.GetRange(nodeIndex, 1));
+                    int nodeIndex = (int)(TestserverNodeIds.Count * random.NextDouble());
+                    PublishNodes(TestserverNodeIds.GetRange(nodeIndex, 1));
                 }
 
                 // delay and check if we should stop.
-                await Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct);
+                await Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
                 Logger.Information($"{logPrefix} Iteration {iteration++} completed");
             }
         }
@@ -469,18 +469,18 @@ namespace OpcPublisherTestClient
             {
                 // unpublish nodes randomly selected
                 Logger.Information($"{logPrefix} Iteration {iteration++} started");
-                for (int i = 0; i < _testServerNodeIds.Count && !_ct.IsCancellationRequested; i++)
+                for (int i = 0; i < TestserverNodeIds.Count && !_ct.IsCancellationRequested; i++)
                 {
-                    int nodeIndex = (int)(_testServerNodeIds.Count * random.NextDouble());
-                    UnpublishNodes(_testServerNodeIds.GetRange(nodeIndex, 1));
+                    int nodeIndex = (int)(TestserverNodeIds.Count * random.NextDouble());
+                    UnpublishNodes(TestserverNodeIds.GetRange(nodeIndex, 1));
                 }
-                await Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct);
+                await Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
 
                 // unpublish all nodes
-                UnpublishNodes(_testServerExpandedNodeIds);
+                UnpublishNodes(TestserverExpandedNodeIds);
 
                 // delay and check if we should stop.
-                await Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct);
+                await Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
                 Logger.Information($"{logPrefix} Iteration {iteration++} completed");
             }
         }
@@ -494,13 +494,13 @@ namespace OpcPublisherTestClient
             while (!_ct.IsCancellationRequested)
             {
                 Logger.Information($"{logPrefix} Iteration {iteration++} started");
-                for (int i = 0; i < _testServerNodeIds.Count && !_ct.IsCancellationRequested; i++)
+                for (int i = 0; i < TestserverNodeIds.Count && !_ct.IsCancellationRequested; i++)
                 {
                     try
                     {
                         GetConfiguredNodesOnEndpointCount();
 
-                        await Task.Delay((int)(_maxShortWaitSec * random.NextDouble() * 1000), _ct);
+                        await Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {
@@ -509,7 +509,7 @@ namespace OpcPublisherTestClient
                 }
 
                 // delay and check if we should stop.
-                await Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct);
+                await Task.Delay((int)(MaxLongWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
                 Logger.Information($"{logPrefix} Iteration {iteration++} completed");
             }
         }
@@ -523,37 +523,37 @@ namespace OpcPublisherTestClient
             while (!_ct.IsCancellationRequested)
             {
                 Logger.Information($"{logPrefix} Iteration {iteration++} started");
-                GetPublishedNodesLegacy(_testserverUrl, _ct);
+                GetPublishedNodesLegacy(TestserverUrl, _ct);
                 // delay and check if we should stop.
-                await Task.Delay((int)(_maxLongWaitSec * random.NextDouble() * 1000), _ct);
+                await Task.Delay((int)(MaxLongWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
                 Logger.Information($"{logPrefix} Iteration {iteration} completed");
             }
         }
 
         private int GetConfiguredNodesOnEndpointCount(string idSpecifier = null)
         {
-            return GetConfiguredNodesOnEndpointCount(_testserverUrl, idSpecifier ?? _testSpecifier);
+            return GetConfiguredNodesOnEndpointCount(TestserverUrl, idSpecifier ?? TestSpecifier);
         }
 
         private int GetConfiguredNodesOnEndpointCount(string endpointUrl, string idSpecifier = null)
         {
             int result = 0;
-            List<NodeModel> nodeList = null;
-            nodeList = GetConfiguredNodesOnEndpoint(endpointUrl ?? _testserverUrl, _ct);
-            result = nodeList.Count(n => n.Id.Contains(idSpecifier ?? _testSpecifier));
+            List<OpcNodeOnEndpointModel> nodeList = null;
+            nodeList = GetConfiguredNodesOnEndpoint(endpointUrl ?? TestserverUrl, _ct);
+            result = nodeList.Count(n => n.Id.Contains(idSpecifier ?? TestSpecifier, StringComparison.InvariantCulture));
             return result;
         }
 
         private bool UnpublishNodes(List<NodeIdInfo> nodeIdInfos)
         {
 
-            return UnpublishNodes(nodeIdInfos, _ct, _testserverUrl);
+            return UnpublishNodes(nodeIdInfos, _ct, TestserverUrl);
         }
 
         private bool PublishNodes(List<NodeIdInfo> nodeIdInfos)
         {
 
-            return PublishNodes(nodeIdInfos, _ct, _testserverUrl);
+            return PublishNodes(nodeIdInfos, _ct, TestserverUrl);
         }
 
         private bool UnpublishAllConfiguredNodes()
@@ -566,18 +566,20 @@ namespace OpcPublisherTestClient
         protected abstract bool PublishNodes(List<NodeIdInfo> nodeIdInfos, CancellationToken ct, string endpointUrl = null);
         protected abstract bool UnpublishNodes(List<NodeIdInfo> nodeIdInfos, CancellationToken ct, string endpointUrl = null);
         protected abstract PublishedNodesCollection GetPublishedNodesLegacy(string endpointUrl, CancellationToken ct);
-        protected abstract List<NodeModel> GetConfiguredNodesOnEndpoint(string endpointUrl, CancellationToken ct);
+        protected abstract List<OpcNodeOnEndpointModel> GetConfiguredNodesOnEndpoint(string endpointUrl, CancellationToken ct);
         protected abstract bool UnpublishAllConfiguredNodes(CancellationToken ct);
 
-        protected string _testSpecifier;
-        protected List<NodeIdInfo> _testServerDataTypeExpandedNodeIds = null;
-        protected List<NodeIdInfo> _testServerMultiTagExpandedNodeIds = null;
-        protected List<NodeIdInfo> _testServerNodeIds = null;
-        protected List<NodeIdInfo> _testServerExpandedNodeIds = null;
-        protected List<NodeIdInfo> _testServerComplexNameNodeIds = null;
-        protected string _testserverUrl;
-        protected int _maxShortWaitSec;
-        protected int _maxLongWaitSec;
-        protected CancellationToken _ct;
+        protected string TestSpecifier { get; set; }
+        protected List<NodeIdInfo> TestserverDataTypeExpandedNodeIds { get; } = null;
+        protected List<NodeIdInfo> TestserverMultiTagExpandedNodeIds { get; } = null;
+        protected List<NodeIdInfo> TestserverNodeIds { get; } = null;
+        protected List<NodeIdInfo> TestserverExpandedNodeIds { get; } = null;
+        protected List<NodeIdInfo> TestserverComplexNameNodeIds { get; } = null;
+        protected string TestserverUrl { get; set; }
+        protected int MaxShortWaitSec { get; set; }
+        protected int MaxLongWaitSec { get; set; }
+#pragma warning disable CA1707 // Identifiers should not contain underscores
+        protected CancellationToken _ct { get; set; }
+#pragma warning restore CA1707 // Identifiers should not contain underscores
     }
 }

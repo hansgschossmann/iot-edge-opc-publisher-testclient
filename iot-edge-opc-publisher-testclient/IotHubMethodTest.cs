@@ -8,6 +8,7 @@ namespace OpcPublisherTestClient
 {
     using Microsoft.Azure.Devices;
     using OpcPublisher;
+    using System.Linq;
     using System.Net;
     using static Program;
 
@@ -20,7 +21,7 @@ namespace OpcPublisherTestClient
             Logger.Information($"IoTHub connection string: {iotHubConnectionString}");
             Logger.Information($"IoTHub publisher device name: {iotHubPublisherDeviceName}");
             Logger.Information($"IoTHub publisher module name: {iotHubPublisherModuleName}");
-            _testserverUrl = testserverUrl;
+            TestserverUrl = testserverUrl;
 
             // init IoTHub connection
             _iotHubClient = ServiceClient.CreateFromConnectionString(iotHubConnectionString, TransportType.Amqp_WebSocket_Only);
@@ -56,10 +57,10 @@ namespace OpcPublisherTestClient
 
             try
             {
-                PublishNodesMethodRequestModel publishNodesMethodRequestModel = new PublishNodesMethodRequestModel(endpointUrl ?? _testserverUrl);
+                PublishNodesMethodRequestModel publishNodesMethodRequestModel = new PublishNodesMethodRequestModel(endpointUrl ?? TestserverUrl);
                 foreach (var nodeIdInfo in nodeIdInfos)
                 {
-                    publishNodesMethodRequestModel.Nodes.Add(new NodeModel(nodeIdInfo.Id));
+                    publishNodesMethodRequestModel.OpcNodes.Add(new OpcNodeOnEndpointModel() { Id = nodeIdInfo.Id });
                 }
                 CloudToDeviceMethodResult methodResult = new CloudToDeviceMethodResult();
                 methodResult.Status = (int)HttpStatusCode.NotAcceptable;
@@ -76,7 +77,7 @@ namespace OpcPublisherTestClient
                     }
                     if (methodResult.Status == (int)HttpStatusCode.NotAcceptable)
                     {
-                        Thread.Sleep(MAX_SHORT_WAIT_SEC * 1000);
+                        Thread.Sleep(MaxShortWaitSec * 1000);
                     }
                     else
                     {
@@ -112,7 +113,7 @@ namespace OpcPublisherTestClient
                 UnpublishNodesMethodRequestModel unpublishNodesMethodRequestModel = new UnpublishNodesMethodRequestModel(endpointUrl);
                 foreach (var nodeIdInfo in nodeIdInfos)
                 {
-                    unpublishNodesMethodRequestModel.Nodes.Add(new NodeModel(nodeIdInfo.Id));
+                    unpublishNodesMethodRequestModel.OpcNodes.Add(new OpcNodeOnEndpointModel() { Id = nodeIdInfo.Id });
                 }
                 _unpublishNodesMethod.SetPayloadJson(JsonConvert.SerializeObject(unpublishNodesMethodRequestModel));
                 CloudToDeviceMethodResult result;
@@ -162,7 +163,14 @@ namespace OpcPublisherTestClient
                 {
                     result = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _publisherModuleName, _unpublishAllNodesMethod, ct).Result;
                 }
-                Logger.Debug($"{logPrefix} succeeded, status: '{result.Status}'");
+                if (result.Status == (int)HttpStatusCode.OK)
+                {
+                    Logger.Debug($"{logPrefix} succedded {(string.IsNullOrEmpty(endpointUrl) ? $"(endpoint: {endpointUrl})" : "(all endpoints)")}, statusCode: '{result.Status}'");
+                }
+                else
+                {
+                    Logger.Warning($"{logPrefix} failed {(string.IsNullOrEmpty(endpointUrl) ? $"(endpoint: {endpointUrl})" : "(all endpoints)")}, statusCode: '{result.Status}'");
+                }
             }
             catch (Exception e)
             {
@@ -195,7 +203,7 @@ namespace OpcPublisherTestClient
                     response = JsonConvert.DeserializeObject<GetConfiguredEndpointsMethodResponseModel>(result.GetPayloadAsJson());
                     if (response != null && response.Endpoints != null)
                     {
-                        endpoints.AddRange(response.Endpoints);
+                        endpoints.AddRange(response.Endpoints.Select(e => e.EndpointUrl).ToList());
                     }
                     if (response == null || response.ContinuationToken == null)
                     {
@@ -214,7 +222,7 @@ namespace OpcPublisherTestClient
 
         protected override PublishedNodesCollection GetPublishedNodesLegacy(string endpointUrl, CancellationToken ct)
         {
-            List<NodeModel> nodeList = GetConfiguredNodesOnEndpoint(endpointUrl, ct);
+            List<OpcNodeOnEndpointModel> nodeList = GetConfiguredNodesOnEndpoint(endpointUrl, ct);
             PublishedNodesCollection publishedNodes = new PublishedNodesCollection();
             foreach (var node in nodeList)
             {
@@ -226,11 +234,11 @@ namespace OpcPublisherTestClient
             return publishedNodes;
         }
 
-        protected override List<NodeModel> GetConfiguredNodesOnEndpoint(string endpointUrl, CancellationToken ct)
+        protected override List<OpcNodeOnEndpointModel> GetConfiguredNodesOnEndpoint(string endpointUrl, CancellationToken ct)
         {
             string logPrefix = $"{_logClassPrefix}:GetConfiguredNodesOnEndpoint:";
             GetConfiguredNodesOnEndpointMethodResponseModel response = null;
-            List<NodeModel> nodes = new List<NodeModel>();
+            List<OpcNodeOnEndpointModel> nodes = new List<OpcNodeOnEndpointModel>();
             try
             {
                 GetConfiguredNodesOnEndpointMethodRequestModel getConfiguredNodesOnEndpointMethodRequestModel = new GetConfiguredNodesOnEndpointMethodRequestModel(endpointUrl);
@@ -249,23 +257,30 @@ namespace OpcPublisherTestClient
                     {
                         result = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _publisherModuleName, _getConfiguredNodesOnEndpointMethod, ct).Result;
                     }
-                    response = JsonConvert.DeserializeObject<GetConfiguredNodesOnEndpointMethodResponseModel>(result.GetPayloadAsJson());
-                    if (response != null && response.Nodes != null)
+                    if (result.Status == (int)HttpStatusCode.OK)
                     {
-                        nodes.AddRange(response.Nodes);
+                        Logger.Debug($"{logPrefix} succeeded, got {nodes.Count} nodes are published on endpoint '{endpointUrl}')");
+                        response = JsonConvert.DeserializeObject<GetConfiguredNodesOnEndpointMethodResponseModel>(result.GetPayloadAsJson());
+                        if (response != null && response.OpcNodes != null)
+                        {
+                            nodes.AddRange(response.OpcNodes);
+                        }
+                        if (response == null || response.ContinuationToken == null)
+                        {
+                            break;
+                        }
+                        continuationToken = response.ContinuationToken;
                     }
-                    if (response == null || response.ContinuationToken == null)
+                    else
                     {
-                        break;
+                        Logger.Warning($"{logPrefix} failed for endpoint {endpointUrl}");
                     }
-                    continuationToken = response.ContinuationToken;
                 }
             }
             catch (Exception e)
             {
                 Logger.Fatal(e, $"{logPrefix} Exception");
             }
-            Logger.Debug($"{logPrefix} succeeded, got {nodes.Count} nodes are published on endpoint '{endpointUrl}')");
             return nodes;
         }
 
@@ -273,7 +288,6 @@ namespace OpcPublisherTestClient
         {
             string logPrefix = $"{_logClassPrefix}:UnpublishAllConfiguredNodes:";
             CloudToDeviceMethodResult result = null;
-            List<NodeModel> nodes = new List<NodeModel>();
             try
             {
                 UnpublishAllNodesMethodRequestModel unpublishAllNodesMethodRequestModel = new UnpublishAllNodesMethodRequestModel();
@@ -285,6 +299,14 @@ namespace OpcPublisherTestClient
                 else
                 {
                     result = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _publisherModuleName, _unpublishAllNodesMethod, ct).Result;
+                }
+                if (result.Status == (int)HttpStatusCode.OK)
+                {
+                    Logger.Debug($"{logPrefix} succeeded");
+                }
+                else
+                {
+                    Logger.Warning($"{logPrefix} failed");
                 }
             }
             catch (Exception e)

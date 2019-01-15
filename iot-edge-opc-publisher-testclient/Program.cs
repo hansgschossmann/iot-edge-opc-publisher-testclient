@@ -13,24 +13,24 @@ namespace OpcPublisherTestClient
     using System.Reflection;
     using static OpcMethodTest;
 
-    public class Program
+    public sealed class Program
     {
-        public static Serilog.Core.Logger Logger = null;
+        public static Serilog.Core.Logger Logger { get; set; } = null;
 
-        public static bool RunExclusiveTests = true;
+        public static bool RunExclusiveTests { get; set; } = true;
 
         // number of tags for testing huge number of tags
-        public const int MULTI_TAG_NUM = 100000;
+        public const int MultiTagNum = 100000;
         // number of tags for regular tests
-        public const int TEST_TAG_NUM = 500;
+        public const int TestTagNum = 500;
         // number of subscriptions for testing huge number of subscriptions
-        public const int MAX_SUBSCRIPTIONS = 500;
+        public const int MaxSubscriptions = 500;
         // number of endpoints URLs we test
-        public const int MAX_SERVER_ENDPOINTS = 50;
+        public const int MaxServerEndpoints = 50;
         // long wait time
-        public const int MAX_LONG_WAIT_SEC = 10;
+        public const int MaxLongWaitSec = 10;
         // short wait time
-        public const int MAX_SHORT_WAIT_SEC = 5;
+        public const int MaxShortWaitSec = 5;
 
         /// <summary>
         /// Synchronous main method of the app.
@@ -40,10 +40,12 @@ namespace OpcPublisherTestClient
             MainAsync(args).Wait();
         }
 
-        /// <summary>
-        /// Asynchronous part of the main method of the app.
-        /// </summary>
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+                              /// <summary>
+                              /// Asynchronous part of the main method of the app.
+                              /// </summary>
         public async static Task MainAsync(string[] args)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             Logger = new LoggerConfiguration()
                 .WriteTo.Console()
@@ -68,7 +70,7 @@ namespace OpcPublisherTestClient
                 { "aa|autoaccept", "auto accept certificates (for testing only)", a => AutoAccept = a != null },
                 { "ne|noexclusive", "do not execute any exclusive tests", ne => RunExclusiveTests = ne == null },
                 { "tt|testtime=", "the number of seconds to run the different tests", (int t) => testTimeMillisec = t * 1000 },
-                { "tu|testserverurl=", "URL of the OPC UA test server", (string s) => _testserverUrl = s },
+                { "tu|testserverurl=", "URL of the OPC UA test server", (string s) => TestserverUrl = s },
                 { "pu|publisherurl=", "URL of the OPC Publisher (required when using OPC UA methods)", (string s) => PublisherUrl = s },
                 { "o1|opcmethods", "use the OPC UA methods calls to test",  b => opcMethods = b != null },
                 { "ic|iothubconnectionstring=", "IoTHub owner connectionstring", (string s) => iotHubConnectionString = s },
@@ -78,10 +80,12 @@ namespace OpcPublisherTestClient
                 { "lf|logfile=", $"the filename of the logfile to use.\nDefault: './{_logFileName}'", (string l) => _logFileName = l },
                 { "ll|loglevel=", $"the loglevel to use (allowed: fatal, error, warn, info, debug, verbose).\nDefault: info", (string l) => {
                         List<string> logLevels = new List<string> {"fatal", "error", "warn", "info", "debug", "verbose"};
+#pragma warning disable CA1308 // Normalize strings to uppercase
                         if (logLevels.Contains(l.ToLowerInvariant()))
                         {
                             _logLevel = l.ToLowerInvariant();
                         }
+#pragma warning restore CA1308 // Normalize strings to uppercase
                         else
                         {
                             throw new OptionException("The loglevel must be one of: fatal, error, warn, info, debug, verbose", "loglevel");
@@ -185,13 +189,13 @@ namespace OpcPublisherTestClient
             IotHubMethodTest iotHubMethodTest = null;
             if (opcMethods)
             {
-                opcMethodTest = new OpcMethodTest(_testserverUrl, MAX_SHORT_WAIT_SEC, MAX_LONG_WAIT_SEC, ct);
+                opcMethodTest = new OpcMethodTest(TestserverUrl, MaxShortWaitSec, MaxLongWaitSec, ct);
             }
 
             if (iotHubMethods)
             {
-                iotHubMethodTest = new IotHubMethodTest(iotHubConnectionString, iotHubPublisherDeviceName, iotHubPublisherModuleName, _testserverUrl,
-                    MAX_SHORT_WAIT_SEC, MAX_LONG_WAIT_SEC, ct);
+                iotHubMethodTest = new IotHubMethodTest(iotHubConnectionString, iotHubPublisherDeviceName, iotHubPublisherModuleName, TestserverUrl,
+                    MaxShortWaitSec, MaxLongWaitSec, ct);
             }
 
             // run all tests with need exclusive access to the server
@@ -334,6 +338,6 @@ namespace OpcPublisherTestClient
 
         private static string _logFileName = $"{Utils.GetHostName()}-ìot-edge-opc-publisher-testclient.log";
         private static string _logLevel = "info";
-        private static string _testserverUrl = "opc.tcp://testserver:62541/Quickstarts/ReferenceServer";
+        private static string TestserverUrl = "opc.tcp://testserver:62541/Quickstarts/ReferenceServer";
     }
 }

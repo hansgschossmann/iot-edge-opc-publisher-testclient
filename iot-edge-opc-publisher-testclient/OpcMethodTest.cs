@@ -11,18 +11,19 @@ using System.Threading.Tasks;
 namespace OpcPublisherTestClient
 {
     using OpcPublisher;
+    using System.Globalization;
     using static Program;
 
     public class OpcMethodTest : MethodTestBase
     {
-        public static bool AutoAccept = false;
-        public static string PublisherUrl = "opc.tcp://publisher:62222/UA/Publisher";
+        public static bool AutoAccept { get; set; } = false;
+        public static string PublisherUrl { get; set; } = "opc.tcp://publisher:62222/UA/Publisher";
 
         public OpcMethodTest(string testserverUrl, int maxShortWaitSec, int maxLongWaitSec, CancellationToken ct) : base("OpcMethodTest", testserverUrl, maxShortWaitSec, maxLongWaitSec, ct)
         {
             string logPrefix = $"{_logClassPrefix}:OpcMethodTest:";
             Logger.Information($"{logPrefix} Publisher URL: {PublisherUrl}");
-            //_testserverUrl = testserverUrl;
+            //TestserverUrl = testserverUrl;
 
             _application = new ApplicationInstance
             {
@@ -118,7 +119,7 @@ namespace OpcPublisherTestClient
                 var list = new List<MonitoredItem> {
                 new MonitoredItem(subscription.DefaultItem)
                 {
-                    DisplayName = "ServerStatusCurrentTime", StartNodeId = "i="+Variables.Server_ServerStatus_CurrentTime.ToString()
+                    DisplayName = "ServerStatusCurrentTime", StartNodeId = "i="+Variables.Server_ServerStatus_CurrentTime.ToString(CultureInfo.InvariantCulture)
                 }
             };
                 _lastTimestamp = new DateTime(0);
@@ -166,7 +167,7 @@ namespace OpcPublisherTestClient
         //    subscription.Delete(true);
         //}
 
-        private async Task PublishNodesLoopAsync(CancellationToken ct, int maxShortWaitSec, int maxLongWaitSec)
+        private async Task PublishNodesLoopAsync(int maxShortWaitSec, int maxLongWaitSec, CancellationToken ct)
         {
             string logPrefix = $"{_logClassPrefix}:PublishNodesLoopAsync:";
             Random random = new Random();
@@ -176,25 +177,25 @@ namespace OpcPublisherTestClient
             {
                 // publish all nodes.
                 Logger.Information($"{logPrefix} Iteration {iteration++} started");
-                for (int i = 0; i < _testServerNodeIds.Count && !ct.IsCancellationRequested; i++)
+                for (int i = 0; i < TestserverNodeIds.Count && !ct.IsCancellationRequested; i++)
                 {
-                    PublishOneNode(_testServerNodeIds[i]);
+                    PublishOneNode(TestserverNodeIds[i]);
                 }
-                await Task.Delay((int)(maxLongWaitSec * random.NextDouble() * 1000), ct);
+                await Task.Delay((int)(maxLongWaitSec * random.NextDouble() * 1000), ct).ConfigureAwait(false);
 
                 // publish nodes randomly selected.
-                for (int i = 0; i < _testServerNodeIds.Count && !ct.IsCancellationRequested; i++)
+                for (int i = 0; i < TestserverNodeIds.Count && !ct.IsCancellationRequested; i++)
                 {
-                    int nodeIndex = (int)(_testServerNodeIds.Count * random.NextDouble());
-                    PublishOneNode(_testServerNodeIds[nodeIndex]);
+                    int nodeIndex = (int)(TestserverNodeIds.Count * random.NextDouble());
+                    PublishOneNode(TestserverNodeIds[nodeIndex]);
                 }
                 // delay and check if we should stop.
-                await Task.Delay((int)(maxLongWaitSec * random.NextDouble() * 1000), ct);
+                await Task.Delay((int)(maxLongWaitSec * random.NextDouble() * 1000), ct).ConfigureAwait(false);
                 Logger.Information($"{logPrefix} Iteration {iteration++} completed");
             }
         }
 
-        private async Task UnpublishNodesLoopAsync(CancellationToken ct, int maxShortWaitSec, int maxLongWaitSec)
+        private async Task UnpublishNodesLoopAsync(int maxShortWaitSec, int maxLongWaitSec, CancellationToken ct)
         {
             string logPrefix = $"{_logClassPrefix}:UnpublishNodesLoopAsync:";
             Random random = new Random();
@@ -204,21 +205,21 @@ namespace OpcPublisherTestClient
             {
                 // unpublish nodes randomly selected
                 Logger.Information($"{logPrefix} Iteration {iteration++} started");
-                for (int i = 0; i < _testServerNodeIds.Count && !ct.IsCancellationRequested; i++)
+                for (int i = 0; i < TestserverNodeIds.Count && !ct.IsCancellationRequested; i++)
                 {
-                    int nodeIndex = (int)(_testServerNodeIds.Count * random.NextDouble());
-                    UnpublishOneNode(_testServerNodeIds[nodeIndex]);
+                    int nodeIndex = (int)(TestserverNodeIds.Count * random.NextDouble());
+                    UnpublishOneNode(TestserverNodeIds[nodeIndex]);
                 }
-                await Task.Delay((int)(maxLongWaitSec * random.NextDouble() * 1000), ct);
+                await Task.Delay((int)(maxLongWaitSec * random.NextDouble() * 1000), ct).ConfigureAwait(false);
 
                 // unpublish all nodes
-                for (int i = 0; i < _testServerExpandedNodeIds.Count && !ct.IsCancellationRequested; i++)
+                for (int i = 0; i < TestserverExpandedNodeIds.Count && !ct.IsCancellationRequested; i++)
                 {
-                    UnpublishOneNode(_testServerExpandedNodeIds[i]);
+                    UnpublishOneNode(TestserverExpandedNodeIds[i]);
                 }
 
                 // delay and check if we should stop.
-                await Task.Delay((int)(maxLongWaitSec * random.NextDouble() * 1000), ct);
+                await Task.Delay((int)(maxLongWaitSec * random.NextDouble() * 1000), ct).ConfigureAwait(false);
                 Logger.Information($"{logPrefix} Iteration {iteration++} completed");
             }
         }
@@ -231,12 +232,12 @@ namespace OpcPublisherTestClient
 
         //    VariantCollection inputArgumentsTestserver = new VariantCollection()
         //    {
-        //        _testserverUrl
+        //        TestserverUrl
         //    };
 
         //    while (!ct.IsCancellationRequested)
         //    {
-        //        for (int i = 0; i < _testServerNodeIds.Count && !ct.IsCancellationRequested; i++)
+        //        for (int i = 0; i < TestserverNodeIds.Count && !ct.IsCancellationRequested; i++)
         //        {
         //            Logger.Information($"{logPrefix} Iteration {iteration++} started");
         //            try
@@ -297,7 +298,7 @@ namespace OpcPublisherTestClient
                     VariantCollection inputArguments = new VariantCollection()
                 {
                     nodeIdInfo.Id,
-                    _testserverUrl
+                    TestserverUrl
                 };
                     CallMethodRequestCollection requests = new CallMethodRequestCollection();
                     CallMethodResultCollection results = null;
@@ -313,7 +314,7 @@ namespace OpcPublisherTestClient
                     {
                         retryCount++;
                         Logger.Warning($"{logPrefix} need to retry to publish node, since session is not yet activated (nodeId: '{nodeIdInfo.Id}', retry: '{retryCount}')");
-                        Task.Delay(_maxShortWaitSec * 1000).Wait();
+                        Task.Delay(MaxShortWaitSec * 1000).Wait();
                         continue;
                     }
                     if (!nodeIdInfo.Published && StatusCode.IsBad(results[0].StatusCode))
@@ -355,7 +356,7 @@ namespace OpcPublisherTestClient
                 VariantCollection inputArguments = new VariantCollection()
                 {
                     nodeIdInfo.Id,
-                    endpointUrl ?? _testserverUrl
+                    endpointUrl ?? TestserverUrl
                 };
                 CallMethodRequestCollection requests = new CallMethodRequestCollection();
                 CallMethodResultCollection results = null;
@@ -424,8 +425,8 @@ namespace OpcPublisherTestClient
                     if (results?[0]?.OutputArguments.Count == 1)
                     {
                         string stringResult = results[0].OutputArguments[0].ToString();
-                        int jsonStartIndex = stringResult.IndexOf("[");
-                        int jsonEndIndex = stringResult.LastIndexOf("]");
+                        int jsonStartIndex = stringResult.IndexOf("[", StringComparison.InvariantCulture);
+                        int jsonEndIndex = stringResult.LastIndexOf("]", StringComparison.InvariantCulture);
                         nodeList = JsonConvert.DeserializeObject<PublishedNodesCollection>(stringResult.Substring(jsonStartIndex, jsonEndIndex - jsonStartIndex + 1));
                     }
                 }
@@ -437,11 +438,11 @@ namespace OpcPublisherTestClient
             return nodeList;
         }
 
-        protected override List<NodeModel> GetConfiguredNodesOnEndpoint(string endpointUrl, CancellationToken ct)
+        protected override List<OpcNodeOnEndpointModel> GetConfiguredNodesOnEndpoint(string endpointUrl, CancellationToken ct)
         {
             string logPrefix = $"{_logClassPrefix}:GetConfiguredNodesOnEndpoint:";
             Random random = new Random();
-            List<NodeModel> nodeList = new List<NodeModel>();
+            List<OpcNodeOnEndpointModel> nodeList = new List<OpcNodeOnEndpointModel>();
 
             try
             {
@@ -449,7 +450,7 @@ namespace OpcPublisherTestClient
 
                 foreach (var publishedNode in publishedNodes)
                 {
-                    NodeModel node = new NodeModel(publishedNode.NodeID.ToString());
+                    OpcNodeOnEndpointModel node = new OpcNodeOnEndpointModel() { Id = publishedNode.NodeID.ToString() };
                     nodeList.Add(node);
                 }
             }
@@ -467,7 +468,7 @@ namespace OpcPublisherTestClient
 
             VariantCollection inputArgumentsTestserver = new VariantCollection()
             {
-                _testserverUrl
+                TestserverUrl
             };
 
             try
@@ -499,13 +500,8 @@ namespace OpcPublisherTestClient
                     if (results?[0]?.OutputArguments.Count == 1)
                     {
                         string stringResult = results[0].OutputArguments[0].ToString();
-                        int jsonStartIndex = stringResult.IndexOf("[");
-                        int jsonEndIndex = stringResult.IndexOf("]");
-                        //PublishedNodesCollection nodelist = JsonConvert.DeserializeObject<PublishedNodesCollection>(stringResult.Substring(jsonStartIndex, jsonEndIndex - jsonStartIndex + 1));
-                        //foreach (NodeLookup node in nodelist)
-                        //{
-                        //    publishedNodes.Add(node.NodeID.ToString());
-                        //}
+                        int jsonStartIndex = stringResult.IndexOf("[", StringComparison.InvariantCulture);
+                        int jsonEndIndex = stringResult.IndexOf("]", StringComparison.InvariantCulture);
 
                         configFileEntries = JsonConvert.DeserializeObject<List<PublisherConfigurationFileEntryLegacyModel>>(stringResult.Substring(jsonStartIndex, jsonEndIndex - jsonStartIndex + 1));
 
