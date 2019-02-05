@@ -1,10 +1,5 @@
-﻿using Newtonsoft.Json;
-using Opc.Ua;
-using Opc.Ua.Client;
-using Opc.Ua.Configuration;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -110,7 +105,12 @@ namespace OpcPublisherTestClient
                 Task.Run(async () => await PublishNodesLoopAsync().ConfigureAwait(false)),
                 Task.Run(async () => await UnpublishNodesLoopAsync().ConfigureAwait(false)),
                 Task.Run(async () => await GetPublishedNodesLegacyLoopAsync().ConfigureAwait(false)),
-                Task.Run(async () => await GetConfiguredNodesOnEndpointLoopAsync().ConfigureAwait(false))
+                Task.Run(async () => await GetConfiguredNodesOnEndpointLoopAsync().ConfigureAwait(false)),
+                Task.Run(async () => await GetInfoLoopAsync().ConfigureAwait(false)),
+                Task.Run(async () => await GetDiagnosticInfoLoopAsync().ConfigureAwait(false)),
+                Task.Run(async () => await GetDiagnosticStartupLogLoopAsync().ConfigureAwait(false)),
+                Task.Run(async () => await GetDiagnosticLogLoopAsync().ConfigureAwait(false)),
+                Task.Run(async () => await CallUnknownMethodLoopAsync().ConfigureAwait(false)),
             };
             return publisherTests;
         }
@@ -118,7 +118,7 @@ namespace OpcPublisherTestClient
 
         private void SingleNodeIdTest()
         {
-            string logPrefix = $"{this.GetType().Name}:SingleNodeIdTest:";
+            string logPrefix = $"{GetType().Name}:SingleNodeIdTest:";
             Random random = new Random();
 
             // publish a node using NodeId syntax
@@ -153,7 +153,7 @@ namespace OpcPublisherTestClient
         }
         private void SingleExpandedNodeIdTest()
         {
-            string logPrefix = $"{this.GetType().Name}:SingleExpandedNodeIdTest:";
+            string logPrefix = $"{GetType().Name}:SingleExpandedNodeIdTest:";
             Random random = new Random();
 
             // publish a node using ExpandedNodeId syntax
@@ -187,7 +187,7 @@ namespace OpcPublisherTestClient
 
         private void ComplexNodeNameTest()
         {
-            string logPrefix = $"{this.GetType().Name}:ComplexNodeNameTest:";
+            string logPrefix = $"{GetType().Name}:ComplexNodeNameTest:";
             Random random = new Random();
 
             // publish nodes with complex names
@@ -280,8 +280,9 @@ namespace OpcPublisherTestClient
             Logger.Information($"{logPrefix} publish same node using NodeId (first) and ExpandedNodeId (second) syntax and unpublish it once using NodeId syntax");
             UnpublishAllConfiguredNodes();
             PublishNodes(testNodesNodeId);
+            Task.Delay((int)(Math.Max(MaxShortWaitSec, MaxLongWaitSec * random.NextDouble()) * 1000), _ct).Wait();
             PublishNodes(testNodesExpandedNodeId);
-            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Task.Delay((int)(Math.Max(MaxShortWaitSec, MaxLongWaitSec * random.NextDouble()) * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
@@ -304,8 +305,9 @@ namespace OpcPublisherTestClient
             Logger.Information($"{logPrefix} publish same node using NodeId (first) and ExpandedNodeId (second) syntax and unpublish it once using ExpandedNodeId syntax");
             UnpublishAllConfiguredNodes();
             PublishNodes(testNodesNodeId);
+            Task.Delay((int)(Math.Max(MaxShortWaitSec, MaxLongWaitSec * random.NextDouble()) * 1000), _ct).Wait();
             PublishNodes(testNodesExpandedNodeId);
-            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Task.Delay((int)(Math.Max(MaxShortWaitSec, MaxLongWaitSec * random.NextDouble()) * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
@@ -328,8 +330,9 @@ namespace OpcPublisherTestClient
             Logger.Information($"{logPrefix} publish same node using NodeId (second) and ExpandedNodeId (first) syntax and unpublish it once using NodeId syntax");
             UnpublishAllConfiguredNodes();
             PublishNodes(testNodesExpandedNodeId);
+            Task.Delay((int)(Math.Max(MaxShortWaitSec, MaxLongWaitSec * random.NextDouble()) * 1000), _ct).Wait();
             PublishNodes(testNodesNodeId);
-            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Task.Delay((int)(Math.Max(MaxShortWaitSec, MaxLongWaitSec * random.NextDouble()) * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
@@ -353,8 +356,9 @@ namespace OpcPublisherTestClient
             Logger.Information($"{logPrefix} publish same node using NodeId (second) and ExpandedNodeId (first) syntax and unpublish it once using ExpandedNodeId syntax");
             UnpublishAllConfiguredNodes();
             PublishNodes(testNodesExpandedNodeId);
+            Task.Delay((int)(Math.Max(MaxShortWaitSec, MaxLongWaitSec * random.NextDouble()) * 1000), _ct).Wait();
             PublishNodes(testNodesNodeId);
-            Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).Wait();
+            Task.Delay((int)(Math.Max(MaxShortWaitSec, MaxLongWaitSec * random.NextDouble()) * 1000), _ct).Wait();
 
             // fetch the published nodes
             configuredNodesCount = GetConfiguredNodesOnEndpointCount();
@@ -380,7 +384,7 @@ namespace OpcPublisherTestClient
 
         private void DataTypeTest()
         {
-            string logPrefix = $"{this.GetType().Name}:DataTypeTest:";
+            string logPrefix = $"{GetType().Name}:DataTypeTest:";
             Random random = new Random();
 
             Logger.Information($"{logPrefix} started");
@@ -411,7 +415,7 @@ namespace OpcPublisherTestClient
 
         private void MultiTagTest()
         {
-            string logPrefix = $"{this.GetType().Name}:MultiTagTest:";
+            string logPrefix = $"{GetType().Name}:MultiTagTest:";
             Random random = new Random();
 
             // publish all nodes with different data types
@@ -435,7 +439,7 @@ namespace OpcPublisherTestClient
 
         private async Task PublishNodesLoopAsync()
         {
-            string logPrefix = $"{this.GetType().Name}:PublishNodesLoopAsync:";
+            string logPrefix = $"{GetType().Name}:PublishNodesLoopAsync:";
             Random random = new Random();
             int iteration = 0;
 
@@ -461,7 +465,7 @@ namespace OpcPublisherTestClient
 
         private async Task UnpublishNodesLoopAsync()
         {
-            string logPrefix = $"{this.GetType().Name}:UnpublishNodesLoopAsync:";
+            string logPrefix = $"{GetType().Name}:UnpublishNodesLoopAsync:";
             Random random = new Random();
             int iteration = 0;
 
@@ -487,7 +491,7 @@ namespace OpcPublisherTestClient
 
         private async Task GetConfiguredNodesOnEndpointLoopAsync()
         {
-            string logPrefix = $"{this.GetType().Name}:GetConfiguredNodesOnEndpointLoopAsync:";
+            string logPrefix = $"{GetType().Name}:GetConfiguredNodesOnEndpointLoopAsync:";
             Random random = new Random();
             int iteration = 0;
 
@@ -514,9 +518,139 @@ namespace OpcPublisherTestClient
             }
         }
 
+        private async Task GetInfoLoopAsync()
+        {
+            string logPrefix = $"{GetType().Name}:GetInfoLoopAsync:";
+            Random random = new Random();
+            int iteration = 0;
+
+            while (!_ct.IsCancellationRequested)
+            {
+                Logger.Information($"{logPrefix} Iteration {iteration++} started");
+                try
+                {
+                    GetInfo(_ct);
+
+                    await Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    Logger.Fatal(e, $"{logPrefix} Exception");
+                }
+
+                // delay and check if we should stop.
+                await Task.Delay((int)(MaxLongWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
+                Logger.Information($"{logPrefix} Iteration {iteration++} completed");
+            }
+        }
+
+        private async Task GetDiagnosticInfoLoopAsync()
+        {
+            string logPrefix = $"{GetType().Name}:GetDiagnosticInfoLoopAsync:";
+            Random random = new Random();
+            int iteration = 0;
+
+            while (!_ct.IsCancellationRequested)
+            {
+                Logger.Information($"{logPrefix} Iteration {iteration++} started");
+                try
+                {
+                    GetDiagnosticInfo(_ct);
+
+                    await Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    Logger.Fatal(e, $"{logPrefix} Exception");
+                }
+
+                // delay and check if we should stop.
+                await Task.Delay((int)(MaxLongWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
+                Logger.Information($"{logPrefix} Iteration {iteration++} completed");
+            }
+        }
+
+        private async Task GetDiagnosticLogLoopAsync()
+        {
+            string logPrefix = $"{GetType().Name}:GetDiagnosticLogLoopAsync:";
+            Random random = new Random();
+            int iteration = 0;
+
+            while (!_ct.IsCancellationRequested)
+            {
+                Logger.Information($"{logPrefix} Iteration {iteration++} started");
+                try
+                {
+                    GetDiagnosticLog(_ct);
+
+                    await Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    Logger.Fatal(e, $"{logPrefix} Exception");
+                }
+
+                // delay and check if we should stop.
+                await Task.Delay((int)(MaxLongWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
+                Logger.Information($"{logPrefix} Iteration {iteration++} completed");
+            }
+        }
+
+        private async Task GetDiagnosticStartupLogLoopAsync()
+        {
+            string logPrefix = $"{GetType().Name}:GetDiagnosticStartupLogLoopAsync:";
+            Random random = new Random();
+            int iteration = 0;
+
+            while (!_ct.IsCancellationRequested)
+            {
+                Logger.Information($"{logPrefix} Iteration {iteration++} started");
+                try
+                {
+                    GetDiagnosticStartupLog(_ct);
+
+                    await Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    Logger.Fatal(e, $"{logPrefix} Exception");
+                }
+
+                // delay and check if we should stop.
+                await Task.Delay((int)(MaxLongWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
+                Logger.Information($"{logPrefix} Iteration {iteration++} completed");
+            }
+        }
+
+        private async Task CallUnknownMethodLoopAsync()
+        {
+            string logPrefix = $"{GetType().Name}:GetUnknownMethodLoopAsync:";
+            Random random = new Random();
+            int iteration = 0;
+
+            while (!_ct.IsCancellationRequested)
+            {
+                Logger.Information($"{logPrefix} Iteration {iteration++} started");
+                try
+                {
+                    CallUnknownMethod(_ct);
+
+                    await Task.Delay((int)(MaxShortWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    Logger.Fatal(e, $"{logPrefix} Exception");
+                }
+
+                // delay and check if we should stop.
+                await Task.Delay((int)(MaxLongWaitSec * random.NextDouble() * 1000), _ct).ConfigureAwait(false);
+                Logger.Information($"{logPrefix} Iteration {iteration++} completed");
+            }
+        }
+
         private async Task GetPublishedNodesLegacyLoopAsync()
         {
-            string logPrefix = $"{this.GetType().Name}:GetPublishedNodesLegacyLoopAsync:";
+            string logPrefix = $"{GetType().Name}:GetPublishedNodesLegacyLoopAsync:";
             Random random = new Random();
             int iteration = 0;
 
@@ -568,6 +702,12 @@ namespace OpcPublisherTestClient
         protected abstract PublishedNodesCollection GetPublishedNodesLegacy(string endpointUrl, CancellationToken ct);
         protected abstract List<OpcNodeOnEndpointModel> GetConfiguredNodesOnEndpoint(string endpointUrl, CancellationToken ct);
         protected abstract bool UnpublishAllConfiguredNodes(CancellationToken ct);
+        protected abstract void GetInfo(CancellationToken ct);
+        protected abstract void GetDiagnosticInfo(CancellationToken ct);
+        protected abstract void GetDiagnosticLog(CancellationToken ct);
+        protected abstract void GetDiagnosticStartupLog(CancellationToken ct);
+        protected abstract void CallUnknownMethod(CancellationToken ct);
+
 
         protected string TestSpecifier { get; set; }
         protected List<NodeIdInfo> TestserverDataTypeExpandedNodeIds { get; } = null;

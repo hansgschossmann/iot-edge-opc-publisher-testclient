@@ -1,5 +1,5 @@
 ﻿
-using Microsoft.Azure.Devices;
+using Microsoft.Azure.Devices.Client;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -136,13 +136,7 @@ namespace OpcPublisher
         public int LogMessageCount { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
-        public List<string> Log { get; }
-
-        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
-        public int StartupLogMessageCount { get; set; }
-
-        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
-        public List<string> StartupLog { get; }
+        public List<string> Log { get; } = new List<string>();
     }
 
     /// <summary>

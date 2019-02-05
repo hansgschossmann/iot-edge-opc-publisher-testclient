@@ -40,6 +40,11 @@ namespace OpcPublisherTestClient
             _unpublishAllNodesMethod = new CloudToDeviceMethod("UnpublishAllNodes", responseTimeout, connectionTimeout);
             _getConfiguredEndpointsMethod = new CloudToDeviceMethod("GetConfiguredEndpoints", responseTimeout, connectionTimeout);
             _getConfiguredNodesOnEndpointMethod = new CloudToDeviceMethod("GetConfiguredNodesOnEndpoint", responseTimeout, connectionTimeout);
+            _getDiagnosticInfoMethod = new CloudToDeviceMethod("GetDiagnosticInfo", responseTimeout, connectionTimeout);
+            _getInfoMethod = new CloudToDeviceMethod("GetInfo", responseTimeout, connectionTimeout);
+            _getDiagnosticLogMethod = new CloudToDeviceMethod("GetDiagnosticLog", responseTimeout, connectionTimeout);
+            _getDiagnosticStartupLogMethod = new CloudToDeviceMethod("GetDiagnosticStartupLog", responseTimeout, connectionTimeout);
+            _callUnknonwnMethod = new CloudToDeviceMethod("UnknownMethod", responseTimeout, connectionTimeout);
         }
 
         //
@@ -214,7 +219,7 @@ namespace OpcPublisherTestClient
             }
             catch (Exception e)
             {
-               Logger.Fatal(e, $"{logPrefix} Exception ");
+                Logger.Fatal(e, $"{logPrefix} Exception ");
             }
             Logger.Debug($"{logPrefix} succeeded, got {endpoints.Count} endpoints");
             return endpoints;
@@ -273,7 +278,14 @@ namespace OpcPublisherTestClient
                     }
                     else
                     {
-                        Logger.Warning($"{logPrefix} failed for endpoint {endpointUrl}");
+                        if (result.Status == (int)HttpStatusCode.Gone)
+                        {
+                            Logger.Debug($"{logPrefix} node configuration has changed for endpoint {endpointUrl}");
+                        }
+                        else
+                        {
+                            Logger.Warning($"{logPrefix} failed for endpoint {endpointUrl}");
+                        }
                     }
                 }
             }
@@ -317,6 +329,181 @@ namespace OpcPublisherTestClient
             return (HttpStatusCode)result.Status == HttpStatusCode.OK ? true : false;
         }
 
+        protected override void GetInfo(CancellationToken ct)
+        {
+            string logPrefix = $"{_logClassPrefix}:GetInfo:";
+            try
+            {
+                while (true)
+                {
+                    CloudToDeviceMethodResult result;
+                    if (string.IsNullOrEmpty(_publisherModuleName))
+                    {
+                        result = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _getInfoMethod, ct).Result;
+                    }
+                    else
+                    {
+                        result = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _publisherModuleName, _getInfoMethod, ct).Result;
+                    }
+                    if (result.Status == (int)HttpStatusCode.OK)
+                    {
+                        Logger.Debug($"{logPrefix} succeeded");
+                    }
+                    else
+                    {
+                        Logger.Warning($"{logPrefix} failed");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Fatal(e, $"{logPrefix} Exception");
+            }
+        }
+
+        protected override void GetDiagnosticInfo(CancellationToken ct)
+        {
+            string logPrefix = $"{_logClassPrefix}:GetDiagnosticInfo:";
+            List<OpcNodeOnEndpointModel> nodes = new List<OpcNodeOnEndpointModel>();
+            try
+            {
+                while (true)
+                {
+                    CloudToDeviceMethodResult result;
+                    if (string.IsNullOrEmpty(_publisherModuleName))
+                    {
+                        result = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _getDiagnosticInfoMethod, ct).Result;
+                    }
+                    else
+                    {
+                        result = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _publisherModuleName, _getDiagnosticInfoMethod, ct).Result;
+                    }
+                    if (result.Status == (int)HttpStatusCode.OK)
+                    {
+                        Logger.Debug($"{logPrefix} succeeded");
+                    }
+                    else
+                    {
+                        Logger.Warning($"{logPrefix} failed");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Fatal(e, $"{logPrefix} Exception");
+            }
+        }
+
+        protected override void GetDiagnosticLog(CancellationToken ct)
+        {
+            string logPrefix = $"{_logClassPrefix}:GetDiagnosticLog:";
+            List<OpcNodeOnEndpointModel> nodes = new List<OpcNodeOnEndpointModel>();
+            try
+            {
+                while (true)
+                {
+                    CloudToDeviceMethodResult result;
+                    if (string.IsNullOrEmpty(_publisherModuleName))
+                    {
+                        result = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _getDiagnosticLogMethod, ct).Result;
+                    }
+                    else
+                    {
+                        result = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _publisherModuleName, _getDiagnosticLogMethod, ct).Result;
+                    }
+                    if (result.Status == (int)HttpStatusCode.OK)
+                    {
+                        Logger.Debug($"{logPrefix} succeeded");
+                    }
+                    else
+                    {
+                        Logger.Warning($"{logPrefix} failed");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Fatal(e, $"{logPrefix} Exception");
+            }
+        }
+
+        protected override void GetDiagnosticStartupLog(CancellationToken ct)
+        {
+            string logPrefix = $"{_logClassPrefix}:GetDiagnosticStartupLog:";
+            List<OpcNodeOnEndpointModel> nodes = new List<OpcNodeOnEndpointModel>();
+            try
+            {
+                while (true)
+                {
+                    CloudToDeviceMethodResult result;
+                    if (string.IsNullOrEmpty(_publisherModuleName))
+                    {
+                        result = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _getDiagnosticStartupLogMethod, ct).Result;
+                    }
+                    else
+                    {
+                        result = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _publisherModuleName, _getDiagnosticStartupLogMethod, ct).Result;
+                    }
+                    if (result.Status == (int)HttpStatusCode.OK)
+                    {
+                        Logger.Debug($"{logPrefix} succeeded");
+                    }
+                    else
+                    {
+                        Logger.Warning($"{logPrefix} failed");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Fatal(e, $"{logPrefix} Exception");
+            }
+        }
+
+        protected override void CallUnknownMethod(CancellationToken ct)
+        {
+            string logPrefix = $"{_logClassPrefix}:CallUnknownMethod:";
+            List<OpcNodeOnEndpointModel> nodes = new List<OpcNodeOnEndpointModel>();
+            try
+            {
+                while (true)
+                {
+                    CloudToDeviceMethodResult result = null;
+                    try
+                    {
+                        if (string.IsNullOrEmpty(_publisherModuleName))
+                        {
+                            result = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _callUnknonwnMethod, ct).Result;
+                        }
+                        else
+                        {
+                            result = _iotHubClient.InvokeDeviceMethodAsync(_publisherDeviceName, _publisherModuleName, _callUnknonwnMethod, ct).Result;
+                        }
+
+                    }
+                    catch
+                    {
+                        if (result?.Status != (int)HttpStatusCode.NotImplemented)
+                        {
+                            throw;
+                        }
+                    }
+                    if (result.Status == (int)HttpStatusCode.NotImplemented)
+                    {
+                        Logger.Debug($"{logPrefix} succeeded");
+                    }
+                    else
+                    {
+                        Logger.Warning($"{logPrefix} failed");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Fatal(e, $"{logPrefix} Exception");
+            }
+        }
+
         const int MAX_RETRY_COUNT = 3;
 
         private static string _logClassPrefix = "IotHubMethodTest";
@@ -331,5 +518,10 @@ namespace OpcPublisherTestClient
         CloudToDeviceMethod _unpublishAllNodesMethod;
         CloudToDeviceMethod _getConfiguredEndpointsMethod;
         CloudToDeviceMethod _getConfiguredNodesOnEndpointMethod;
+        CloudToDeviceMethod _getInfoMethod;
+        CloudToDeviceMethod _getDiagnosticInfoMethod;
+        CloudToDeviceMethod _getDiagnosticLogMethod;
+        CloudToDeviceMethod _getDiagnosticStartupLogMethod;
+        CloudToDeviceMethod _callUnknonwnMethod;
     }
 }

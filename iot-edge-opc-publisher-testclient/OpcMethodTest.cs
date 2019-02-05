@@ -460,6 +460,7 @@ namespace OpcPublisherTestClient
             }
             return nodeList;
         }
+
         protected override bool UnpublishAllConfiguredNodes(CancellationToken ct)
         {
             string logPrefix = $"{_logClassPrefix}:UnpublishAllConfiguredNodes:";
@@ -528,6 +529,206 @@ namespace OpcPublisherTestClient
                 Logger.Fatal(e, $"{logPrefix} Exception");
             }
             return result;
+        }
+
+        protected override void GetInfo(CancellationToken ct)
+        {
+            string logPrefix = $"{_logClassPrefix}:GetInfo:";
+
+            VariantCollection inputArgumentsMethodCall = new VariantCollection()
+            {
+                "GetInfo",
+            };
+
+            try
+            {
+                CallMethodRequestCollection requests = new CallMethodRequestCollection();
+                CallMethodResultCollection results = new CallMethodResultCollection();
+                DiagnosticInfoCollection diagnosticInfos = null;
+                CallMethodRequest request = new CallMethodRequest
+                {
+                    ObjectId = new NodeId("Methods", 2),
+                    MethodId = new NodeId("IoTHubDirectMethod", 2),
+                };
+                request.InputArguments = inputArgumentsMethodCall;
+                requests.Add(request);
+                try
+                {
+                    ResponseHeader responseHeader = _session.Call(null, requests, out results, out diagnosticInfos);
+                }
+                catch (Exception e)
+                {
+                    Logger.Fatal(e, $"{logPrefix} Exception");
+                }
+                if (StatusCode.IsBad(results[0].StatusCode))
+                {
+                    Logger.Warning($"{logPrefix} call was not successfull (status: '{results[0].StatusCode}'");
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Fatal(e, $"{logPrefix} Exception");
+            }
+        }
+
+        protected override void GetDiagnosticInfo(CancellationToken ct)
+        {
+            string logPrefix = $"{_logClassPrefix}:GetDiagnosticInfo:";
+
+            VariantCollection inputArgumentsMethodCall = new VariantCollection()
+            {
+                "GetDiagnosticInfo",
+            };
+
+            try
+            {
+                CallMethodRequestCollection requests = new CallMethodRequestCollection();
+                CallMethodResultCollection results = new CallMethodResultCollection();
+                DiagnosticInfoCollection diagnosticInfos = null;
+                CallMethodRequest request = new CallMethodRequest
+                {
+                    ObjectId = new NodeId("Methods", 2),
+                    MethodId = new NodeId("IoTHubDirectMethod", 2),
+                };
+                request.InputArguments = inputArgumentsMethodCall;
+                requests.Add(request);
+                try
+                {
+                    ResponseHeader responseHeader = _session.Call(null, requests, out results, out diagnosticInfos);
+                }
+                catch (Exception e)
+                {
+                    Logger.Fatal(e, $"{logPrefix} Exception");
+                }
+                if (StatusCode.IsBad(results[0].StatusCode))
+                {
+                    Logger.Warning($"{logPrefix} call was not successfull (status: '{results[0].StatusCode}'");
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Fatal(e, $"{logPrefix} Exception");
+            }
+        }
+
+        protected override void GetDiagnosticLog(CancellationToken ct)
+        {
+            string logPrefix = $"{_logClassPrefix}:GetDiagnosticLog:";
+
+            VariantCollection inputArgumentsMethodCall = new VariantCollection()
+            {
+                "GetDiagnosticLog",
+            };
+
+            try
+            {
+                CallMethodRequestCollection requests = new CallMethodRequestCollection();
+                CallMethodResultCollection results = new CallMethodResultCollection();
+                DiagnosticInfoCollection diagnosticInfos = null;
+                CallMethodRequest request = new CallMethodRequest
+                {
+                    ObjectId = new NodeId("Methods", 2),
+                    MethodId = new NodeId("IoTHubDirectMethod", 2),
+                };
+                request.InputArguments = inputArgumentsMethodCall;
+                requests.Add(request);
+                try
+                {
+                    ResponseHeader responseHeader = _session.Call(null, requests, out results, out diagnosticInfos);
+                }
+                catch (Exception e)
+                {
+                    Logger.Fatal(e, $"{logPrefix} Exception");
+                }
+                if (StatusCode.IsBad(results[0].StatusCode))
+                {
+                    Logger.Warning($"{logPrefix} call was not successfull (status: '{results[0].StatusCode}'");
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Fatal(e, $"{logPrefix} Exception");
+            }
+        }
+
+        protected override void GetDiagnosticStartupLog(CancellationToken ct)
+        {
+            string logPrefix = $"{_logClassPrefix}:GetDiagnosticStartupLog:";
+
+            VariantCollection inputArgumentsMethodCall = new VariantCollection()
+            {
+                "GetDiagnosticStartupLog",
+            };
+
+            try
+            {
+                CallMethodRequestCollection requests = new CallMethodRequestCollection();
+                CallMethodResultCollection results = new CallMethodResultCollection();
+                DiagnosticInfoCollection diagnosticInfos = null;
+                CallMethodRequest request = new CallMethodRequest
+                {
+                    ObjectId = new NodeId("Methods", 2),
+                    MethodId = new NodeId("IoTHubDirectMethod", 2),
+                };
+                request.InputArguments = inputArgumentsMethodCall;
+                requests.Add(request);
+                try
+                {
+                    ResponseHeader responseHeader = _session.Call(null, requests, out results, out diagnosticInfos);
+                }
+                catch (Exception e)
+                {
+                    Logger.Fatal(e, $"{logPrefix} Exception");
+                }
+                if (StatusCode.IsBad(results[0].StatusCode))
+                {
+                    Logger.Warning($"{logPrefix} call was not successfull (status: '{results[0].StatusCode}'");
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Fatal(e, $"{logPrefix} Exception");
+            }
+        }
+
+        protected override void CallUnknownMethod(CancellationToken ct)
+        {
+            string logPrefix = $"{_logClassPrefix}:CallUnknownMethod:";
+
+            VariantCollection inputArgumentsMethodCall = new VariantCollection()
+            {
+                "UnknownMethod",
+            };
+
+            try
+            {
+                CallMethodRequestCollection requests = new CallMethodRequestCollection();
+                CallMethodResultCollection results = new CallMethodResultCollection();
+                DiagnosticInfoCollection diagnosticInfos = null;
+                CallMethodRequest request = new CallMethodRequest
+                {
+                    ObjectId = new NodeId("Methods", 2),
+                    MethodId = new NodeId("IoTHubDirectMethod", 2),
+                };
+                request.InputArguments = inputArgumentsMethodCall;
+                requests.Add(request);
+                try
+                {
+                    ResponseHeader responseHeader = _session.Call(null, requests, out results, out diagnosticInfos);
+                }
+                catch (Exception e)
+                {
+                    Logger.Fatal(e, $"{logPrefix} Exception");
+                }
+                if (StatusCode.IsBad(results[0].StatusCode))
+                {
+                    Logger.Warning($"{logPrefix} call was not successfull (status: '{results[0].StatusCode}'");
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Fatal(e, $"{logPrefix} Exception");
+            }
         }
 
         private void Client_KeepAlive(Session sender, KeepAliveEventArgs e)
